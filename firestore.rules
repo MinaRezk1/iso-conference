@@ -1,0 +1,12 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Anyone attending the conference can read the app's data (schedule,
+    // hymns, scores, rooms, etc). Only a signed-in admin (Firebase
+    // Authentication) can create, edit, or delete data.
+    match /{document=**} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+  }
+}
