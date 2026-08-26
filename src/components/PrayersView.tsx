@@ -62,7 +62,7 @@ function renderSectionText(text: string) {
       );
     }
     return (
-      <p key={idx} className="text-sm sm:text-[15px] text-slate-200 leading-[2] my-2.5 text-justify">
+      <p key={idx} className="text-base text-slate-200 leading-[2] my-2.5 text-justify">
         {trimmed}
       </p>
     );

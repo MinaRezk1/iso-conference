@@ -29,10 +29,12 @@ import {
   Table,
   LayoutGrid,
   Search,
-  UserCheck
+  UserCheck,
+  RefreshCw
 } from "lucide-react";
 import { EventSchedule, Team } from "../types";
 import { db } from "../lib/firebase";
+import { syncDay2ScheduleWithLatest } from "../lib/seedData";
 import { collection, addDoc, deleteDoc, doc, updateDoc, setDoc, writeBatch } from "firebase/firestore";
 import { Calendar3D } from "./ThreeDIcons";
 import StructuredScoringModal, { SessionCategory } from "./StructuredScoringModal";
@@ -83,6 +85,29 @@ const IconMap: { [key: string]: any } = {
 
 export default function ScheduleView({ schedule, teams, isAdmin, onRefreshData }: ScheduleViewProps) {
   const [activeDay, setActiveDay] = useState<number>(1);
+  const [isSyncingDay2, setIsSyncingDay2] = useState(false);
+
+  const handleSyncDay2 = async () => {
+    if (!isAdmin) return;
+    if (
+      !window.confirm(
+        "هيتم حذف كل فقرات اليوم التاني الحالية واستبدالها بالجدول الجديد بالكامل (اليوم الأول مش هيتأثر). متأكد؟"
+      )
+    ) {
+      return;
+    }
+    setIsSyncingDay2(true);
+    try {
+      await syncDay2ScheduleWithLatest();
+      onRefreshData();
+      alert("تمت مزامنة جدول اليوم التاني بنجاح!");
+    } catch (err) {
+      console.error(err);
+      alert("حدث خطأ أثناء مزامنة الجدول.");
+    } finally {
+      setIsSyncingDay2(false);
+    }
+  };
   const [viewMode, setViewMode] = useState<'timeline' | 'matrix'>('timeline');
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -488,13 +513,24 @@ export default function ScheduleView({ schedule, teams, isAdmin, onRefreshData }
         {/* View Controls & Actions */}
         <div className="flex items-center gap-2 flex-wrap">
           {isAdmin && (
-            <button
-              onClick={handleOpenAdd}
-              className="flex items-center gap-1.5 glass-button px-4 py-2.5 text-xs font-bold"
-            >
-              <Plus className="w-4 h-4" />
-              <span>إضافة فقرة جديدة</span>
-            </button>
+            <>
+              <button
+                onClick={handleOpenAdd}
+                className="flex items-center gap-1.5 glass-button px-4 py-2.5 text-xs font-bold"
+              >
+                <Plus className="w-4 h-4" />
+                <span>إضافة فقرة جديدة</span>
+              </button>
+              <button
+                onClick={handleSyncDay2}
+                disabled={isSyncingDay2}
+                title="حذف فقرات اليوم التاني الحالية واستبدالها بآخر نسخة من الجدول (اليوم الأول لا يتأثر)"
+                className="flex items-center gap-1.5 px-4 py-2.5 text-xs font-bold rounded-full bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer"
+              >
+                <RefreshCw className={`w-4 h-4 ${isSyncingDay2 ? "animate-spin" : ""}`} />
+                <span>{isSyncingDay2 ? "جارٍ المزامنة..." : "تحديث جدول اليوم التاني"}</span>
+              </button>
+            </>
           )}
         </div>
       </div>

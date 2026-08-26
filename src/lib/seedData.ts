@@ -145,9 +145,11 @@ export const INITIAL_SCHEDULE: EventSchedule[] = [
   { id: "event1_17", title: "ألعاب وفقرات ترفيهية مسائية", time: "10:00 PM - 12:00 AM", day: 1, location: "الملعب / القاعة", responsible: "لجنة الألعاب", icon: "Gamepad2", completed: false, maxPoints: 150 },
 
   // Day 2
-  { id: "event2_1", title: "صلاة باكر", time: "09:00 AM - 10:00 AM", day: 2, location: "القاعة الرئيسية", responsible: "خدام الصلاة", icon: "Sun", completed: false },
+  { id: "event2_wake", title: "صحيان", time: "08:00 AM - 08:30 AM", day: 2, location: "الغرف", responsible: "", icon: "Sun", completed: false },
+  { id: "event2_1", title: "صلاة باكر", time: "08:30 AM - 09:00 AM", day: 2, location: "القاعة الرئيسية", responsible: "خدام الصلاة", icon: "Sun", completed: false },
+  { id: "event2_hymn", title: "اللحن", time: "09:00 AM - 10:00 AM", day: 2, location: "القاعة الرئيسية", responsible: "خدام الألحان", icon: "Music", completed: false },
   { id: "event2_2", title: "فطار", time: "10:00 AM - 11:00 AM", day: 2, location: "المطعم", responsible: "لجنة التغذية", icon: "Smile", completed: false },
-  { id: "event2_3", title: "دراسة كتاب يشوع بن سيراخ 48 و 49 ومسابقة على الدراسة", time: "11:00 AM - 12:00 PM", day: 2, location: "القاعة الرئيسية", responsible: "خدام دراسة الكتاب", icon: "BookOpen", completed: false, maxPoints: 100 },
+  { id: "event2_3", title: "دراسة كتاب يشوع بن سيراخ 48 و 49، يعقوب 1 ومسابقة على الدراسة", time: "11:00 AM - 12:00 PM", day: 2, location: "القاعة الرئيسية", responsible: "خدام دراسة الكتاب", icon: "BookOpen", completed: false, maxPoints: 100 },
   { id: "event2_4", title: "حلقة دوارة (شخصية + موضوع طقسي + عمل فني)", time: "12:00 PM - 01:30 PM", day: 2, location: "مجموعات العمل", responsible: "خدام الحلقات الدوارة", icon: "Users", completed: false, maxPoints: 150 },
   { id: "event2_5", title: "محاضرة: (الاحتراق النفسي)", time: "01:30 PM - 03:00 PM", day: 2, speaker: "أبونا رافائيل رمزي", location: "القاعة الرئيسية", responsible: "أبونا رافائيل رمزي", icon: "Compass", completed: false },
   { id: "event2_6", title: "الغداء", time: "03:00 PM - 04:00 PM", day: 2, location: "المطعم", responsible: "لجنة التغذية", icon: "Smile", completed: false },
@@ -755,6 +757,34 @@ export async function seedPrayersIfEmpty() {
     }
   } catch (e) {
     console.error("Error seeding prayers:", e);
+  }
+}
+
+export async function syncDay2ScheduleWithLatest() {
+  try {
+    const schedRef = collection(db, "schedule");
+    const snapshot = await getDocs(schedRef);
+    const batch = writeBatch(db);
+
+    // Delete only existing Day 2 events, leave Day 1 untouched
+    snapshot.forEach((docSnap) => {
+      if (docSnap.data()?.day === 2) {
+        batch.delete(docSnap.ref);
+      }
+    });
+
+    // Re-add the current Day 2 schedule from the code
+    const day2Events = INITIAL_SCHEDULE.filter((e) => e.day === 2);
+    for (const ev of day2Events) {
+      const docRef = doc(db, "schedule", ev.id);
+      batch.set(docRef, ev);
+    }
+
+    await batch.commit();
+    console.log("Day 2 schedule synced successfully!");
+  } catch (e) {
+    console.error("Error syncing Day 2 schedule:", e);
+    throw e;
   }
 }
 

@@ -28,6 +28,16 @@
   .glass-button {
     @apply bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 rounded-full transition-all duration-300;
   }
+  .pb-safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .scrollbar-none {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 /* Custom fade-in animation */
@@ -38,4 +48,17 @@
 
 .animate-fade-in {
   animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* iOS Safari zooms the whole page in when a form field's font-size is
+   under 16px on focus. Many inputs across the app use smaller Tailwind
+   text sizes (text-xs, text-sm) for visual consistency, so we override
+   just the effective font-size on small/touch screens without having to
+   touch every component individually. Desktop keeps the original sizes. */
+@media (max-width: 640px) {
+  input,
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
 }

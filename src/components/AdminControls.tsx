@@ -258,6 +258,18 @@ export default function AdminControls({
               <span className="text-xs font-black text-emerald-300">وضع الخادم</span>
             </div>
 
+            <button
+              onClick={() => {
+                setShowManageAdmins(true);
+                setInternalShowModal(true);
+              }}
+              title="إضافة أو حذف حسابات دخول للخدام"
+              className="flex items-center gap-1 bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-200 border border-indigo-400/50 px-2.5 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer active:scale-95 shrink-0 shadow-sm"
+            >
+              <Users className="w-3.5 h-3.5 text-indigo-300 stroke-[2.5]" />
+              <span className="hidden lg:inline">الحسابات</span>
+            </button>
+
             {onExportData && (
               <button
                 onClick={onExportData}
