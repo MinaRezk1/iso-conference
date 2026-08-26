@@ -68,9 +68,12 @@ export interface Lesson {
   isStaffOnly?: boolean;
 }
 
+// المؤتمر مشترك (أولاد وبنات، خدام وخادمات)
+export type PersonRole = 'khadem' | 'khadema' | 'makhdoom' | 'makhdooma';
+
 export interface Occupant {
   name: string;
-  role: 'boy' | 'servant';
+  role: PersonRole;
 }
 
 export interface Room {
@@ -78,7 +81,7 @@ export interface Room {
   roomNumber: string;
   building: string;
   floor: string;
-  type: 'boys' | 'servants';
+  type: 'boys' | 'girls';
   capacity: number;
   occupants: Occupant[];
 }
@@ -129,7 +132,7 @@ export interface FootballAwards {
 export interface ConferenceMember {
   id: string;
   name: string;
-  role?: 'boy' | 'servant';
+  role?: PersonRole;
   notes?: string;
 }
 
@@ -155,6 +158,14 @@ export interface Prayer {
   subtitle?: string;
   order: number;
   sections: PrayerSection[];
+}
+
+export interface ActivityLogEntry {
+  id: string;
+  username: string;
+  action: string;
+  details: string;
+  timestamp: any;
 }
 
 export interface AdminUser {

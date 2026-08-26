@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { Team, ScoreLog } from "../types";
 import { db } from "../lib/firebase";
+import { logActivity } from "../lib/activityLog";
 import { 
   collection, 
   addDoc, 
@@ -105,6 +106,12 @@ export default function ScoreboardView({ teams, scoreLogs, isAdmin, onRefreshDat
     }
 
     await batch.commit();
+
+    const summary = teams
+      .map((t) => `${t.name}: ${data.teamPointsMap[t.id] > 0 ? "+" : ""}${data.teamPointsMap[t.id] || 0}`)
+      .join(" | ");
+    logActivity("إضافة نقاط", `${data.activityName} — ${summary}`);
+
     onRefreshData();
   };
 
@@ -284,6 +291,7 @@ export default function ScoreboardView({ teams, scoreLogs, isAdmin, onRefreshDat
       }
 
       await batch.commit();
+      logActivity("حذف سكور فقرة", log.activityName);
       onRefreshData();
     } catch (err) {
       console.error(err);

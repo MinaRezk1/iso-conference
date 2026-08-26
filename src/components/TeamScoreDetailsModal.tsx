@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { Team, ScoreLog } from "../types";
 import { db } from "../lib/firebase";
+import { logActivity } from "../lib/activityLog";
 import {
   doc,
   updateDoc,
@@ -111,6 +112,10 @@ export default function TeamScoreDetailsModal({
       batch.update(teamRef, { totalScore: newTotal });
 
       await batch.commit();
+      logActivity(
+        "إضافة نقاط مباشرة لفريق",
+        `${customReason.trim()} — ${team.name}: ${customPointsVal > 0 ? "+" : ""}${customPointsVal}`
+      );
       onRefreshData();
 
       setCustomReason("");
@@ -171,6 +176,10 @@ export default function TeamScoreDetailsModal({
       }
 
       await batch.commit();
+      logActivity(
+        "تعديل نقاط فقرة لفريق",
+        `${editLogName.trim()} — ${team.name}: ${oldPts} → ${editLogPoints}`
+      );
       onRefreshData();
       setEditingLogId(null);
     } catch (err) {
@@ -206,6 +215,7 @@ export default function TeamScoreDetailsModal({
       batch.update(teamRef, { totalScore: newScore });
 
       await batch.commit();
+      logActivity("حذف نقاط فقرة لفريق", `${log.activityName} — ${team.name} (كانت ${currentPts})`);
       onRefreshData();
     } catch (err) {
       console.error(err);

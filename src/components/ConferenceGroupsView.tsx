@@ -14,10 +14,12 @@ import {
   User,
   Crown
 } from "lucide-react";
-import { ConferenceGroup, ConferenceMember } from "../types";
+import { ConferenceGroup, ConferenceMember, PersonRole } from "../types";
 import { db } from "../lib/firebase";
 import { doc, updateDoc, setDoc, writeBatch, collection } from "firebase/firestore";
 import { INITIAL_CONFERENCE_GROUPS } from "../lib/seedData";
+import { logActivity } from "../lib/activityLog";
+import { ROLE_OPTIONS, roleLabel, isServantRole } from "../lib/roles";
 
 interface ConferenceGroupsViewProps {
   groups: ConferenceGroup[];
@@ -33,6 +35,7 @@ export default function ConferenceGroupsView({ groups, isAdmin, onRefreshData }:
   const [showAddMember, setShowAddMember] = useState<boolean>(false);
   const [addMemberName, setAddMemberName] = useState<string>("");
   const [addMemberGroupId, setAddMemberGroupId] = useState<string>("g1");
+  const [addMemberRole, setAddMemberRole] = useState<PersonRole>("makhdoom");
 
   const [moveMemberData, setMoveMemberData] = useState<{
     sourceGroup: ConferenceGroup;
@@ -45,6 +48,7 @@ export default function ConferenceGroupsView({ groups, isAdmin, onRefreshData }:
     member: ConferenceMember;
   } | null>(null);
   const [editMemberName, setEditMemberName] = useState<string>("");
+  const [editMemberRole, setEditMemberRole] = useState<PersonRole>("makhdoom");
 
   const [showResetConfirm, setShowResetConfirm] = useState<boolean>(false);
   const [actionLoading, setActionLoading] = useState<boolean>(false);
@@ -87,14 +91,21 @@ export default function ConferenceGroupsView({ groups, isAdmin, onRefreshData }:
 
       const newMember: ConferenceMember = {
         id: `m_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
-        name: addMemberName.trim()
+        name: addMemberName.trim(),
+        role: addMemberRole
       };
 
       const updatedMembers = [...(targetGroup.members || []), newMember];
       const docRef = doc(db, "conferenceGroups", targetGroup.id);
       await setDoc(docRef, { ...targetGroup, members: updatedMembers }, { merge: true });
 
+      logActivity(
+        "إضافة عضو لمجموعة",
+        `${newMember.name} (${roleLabel(addMemberRole)}) لـ ${targetGroup.name}`
+      );
+
       setAddMemberName("");
+      setAddMemberRole("makhdoom");
       setShowAddMember(false);
       if (onRefreshData) onRefreshData();
     } catch (err) {
@@ -144,6 +155,11 @@ export default function ConferenceGroupsView({ groups, isAdmin, onRefreshData }:
 
       await batch.commit();
 
+      logActivity(
+        "نقل عضو بين مجموعات",
+        `${moveMemberData.member.name} من ${sourceGroup.name} إلى ${targetGroup.name}`
+      );
+
       setMoveMemberData(null);
       if (onRefreshData) onRefreshData();
     } catch (err) {
@@ -158,6 +174,7 @@ export default function ConferenceGroupsView({ groups, isAdmin, onRefreshData }:
   const handleOpenEditModal = (group: ConferenceGroup, member: ConferenceMember) => {
     setEditMemberData({ group, member });
     setEditMemberName(member.name);
+    setEditMemberRole(member.role || "makhdoom");
   };
 
   const handleSaveEditMember = async (e: React.FormEvent) => {
@@ -170,13 +187,18 @@ export default function ConferenceGroupsView({ groups, isAdmin, onRefreshData }:
       const group = editMemberData.group;
       const updatedMembers = group.members.map(m => {
         if (m.id === editMemberData.member.id) {
-          return { ...m, name: editMemberName.trim() };
+          return { ...m, name: editMemberName.trim(), role: editMemberRole };
         }
         return m;
       });
 
       const docRef = doc(db, "conferenceGroups", group.id);
       await setDoc(docRef, { ...group, members: updatedMembers }, { merge: true });
+
+      logActivity(
+        "تعديل بيانات عضو",
+        `${editMemberName.trim()} (${roleLabel(editMemberRole)}) في ${group.name}`
+      );
 
       setEditMemberData(null);
       if (onRefreshData) onRefreshData();
@@ -198,6 +220,8 @@ export default function ConferenceGroupsView({ groups, isAdmin, onRefreshData }:
       const updatedMembers = group.members.filter(m => m.id !== member.id);
       const docRef = doc(db, "conferenceGroups", group.id);
       await setDoc(docRef, { ...group, members: updatedMembers }, { merge: true });
+
+      logActivity("حذف عضو من مجموعة", `${member.name} من ${group.name}`);
 
       if (onRefreshData) onRefreshData();
     } catch (err) {
@@ -257,12 +281,13 @@ export default function ConferenceGroupsView({ groups, isAdmin, onRefreshData }:
                 onClick={() => {
                   setAddMemberGroupId(groups[0]?.id || "g1");
                   setAddMemberName("");
+                  setAddMemberRole("makhdoom");
                   setShowAddMember(true);
                 }}
                 className="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 flex items-center gap-2 cursor-pointer transition-all active:scale-95"
               >
                 <UserPlus className="w-4 h-4" />
-                <span>إضافة ولد جديد</span>
+                <span>إضافة عضو جديد</span>
               </button>
             )}
 
@@ -378,7 +403,7 @@ export default function ConferenceGroupsView({ groups, isAdmin, onRefreshData }:
                         {group.name}
                       </h3>
                       <p className="text-[11px] font-bold text-slate-400 mt-0.5">
-                        عدد الأعضاء الحالي: <span className="text-amber-400">{group.members?.length || 0} ولد</span>
+                        عدد الأعضاء الحالي: <span className="text-amber-400">{group.members?.length || 0} فرد</span>
                       </p>
                     </div>
                   </div>
@@ -388,10 +413,11 @@ export default function ConferenceGroupsView({ groups, isAdmin, onRefreshData }:
                     onClick={() => {
                       setAddMemberGroupId(group.id);
                       setAddMemberName("");
+                      setAddMemberRole("makhdoom");
                       setShowAddMember(true);
                     }}
                     className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-indigo-300 hover:text-white border border-white/10 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
-                    title="إضافة ولد لهذه المجموعة"
+                    title="إضافة عضو لهذه المجموعة"
                   >
                     <UserPlus className="w-3.5 h-3.5" />
                     <span className="hidden sm:inline">إضافة عضو</span>
@@ -424,6 +450,15 @@ export default function ConferenceGroupsView({ groups, isAdmin, onRefreshData }:
                               }`}>
                                 {member.name}
                               </span>
+                              {member.role && (
+                                <span className={`text-[9px] px-1.5 py-0.5 rounded border font-bold inline-block mt-0.5 ${
+                                  isServantRole(member.role)
+                                    ? "bg-indigo-500/20 text-indigo-300 border-indigo-500/30"
+                                    : "bg-white/10 text-slate-400 border-white/10"
+                                }`}>
+                                  {roleLabel(member.role)}
+                                </span>
+                              )}
                             </div>
                           </div>
 
@@ -496,14 +531,14 @@ export default function ConferenceGroupsView({ groups, isAdmin, onRefreshData }:
                 <UserPlus className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-lg font-black text-white">إضافة ولد جديد للمجموعة</h3>
-                <p className="text-xs text-slate-400 mt-0.5">أدخل اسم الولد ثم اختر المجموعة المستهدفة</p>
+                <h3 className="text-lg font-black text-white">إضافة عضو جديد للمجموعة</h3>
+                <p className="text-xs text-slate-400 mt-0.5">أدخل الاسم واختر الدور والمجموعة المستهدفة</p>
               </div>
             </div>
 
             <form onSubmit={handleSaveNewMember} className="space-y-4 mt-5">
               <div>
-                <label className="text-xs font-bold text-slate-300 block mb-2">اسم الولد بالكامل</label>
+                <label className="text-xs font-bold text-slate-300 block mb-2">الاسم بالكامل</label>
                 <input
                   type="text"
                   value={addMemberName}
@@ -512,6 +547,28 @@ export default function ConferenceGroupsView({ groups, isAdmin, onRefreshData }:
                   required
                   className="w-full px-4 py-3 rounded-xl border border-slate-700 bg-slate-950 text-white text-xs font-bold focus:outline-none focus:border-indigo-500"
                 />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-slate-300 block mb-2">الدور / الصفة</label>
+                <div className="grid grid-cols-2 gap-2.5">
+                  {ROLE_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setAddMemberRole(opt.value)}
+                      className={`py-2.5 text-xs font-bold rounded-xl border transition-colors cursor-pointer ${
+                        addMemberRole === opt.value
+                          ? isServantRole(opt.value)
+                            ? "bg-violet-500/20 text-violet-300 border-violet-500/50 shadow-lg shadow-violet-500/20"
+                            : "bg-blue-500/20 text-blue-300 border-blue-500/50 shadow-lg shadow-blue-500/20"
+                          : "bg-black/20 border-white/10 text-slate-400 hover:bg-white/5"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <div>
@@ -535,7 +592,7 @@ export default function ConferenceGroupsView({ groups, isAdmin, onRefreshData }:
                   disabled={actionLoading}
                   className="flex-1 py-3 rounded-xl text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 transition-colors shadow-lg shadow-indigo-600/30 cursor-pointer disabled:opacity-50"
                 >
-                  {actionLoading ? "جاري الحفظ..." : "حفظ الولد"}
+                  {actionLoading ? "جاري الحفظ..." : "حفظ العضو"}
                 </button>
                 <button
                   type="button"
@@ -654,7 +711,7 @@ export default function ConferenceGroupsView({ groups, isAdmin, onRefreshData }:
 
             <form onSubmit={handleSaveEditMember} className="space-y-4 mt-5">
               <div>
-                <label className="text-xs font-bold text-slate-300 block mb-2">اسم الولد المعدل</label>
+                <label className="text-xs font-bold text-slate-300 block mb-2">الاسم المعدل</label>
                 <input
                   type="text"
                   value={editMemberName}
@@ -664,13 +721,35 @@ export default function ConferenceGroupsView({ groups, isAdmin, onRefreshData }:
                 />
               </div>
 
+              <div>
+                <label className="text-xs font-bold text-slate-300 block mb-2">الدور / الصفة</label>
+                <div className="grid grid-cols-2 gap-2.5">
+                  {ROLE_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setEditMemberRole(opt.value)}
+                      className={`py-2.5 text-xs font-bold rounded-xl border transition-colors cursor-pointer ${
+                        editMemberRole === opt.value
+                          ? isServantRole(opt.value)
+                            ? "bg-violet-500/20 text-violet-300 border-violet-500/50 shadow-lg shadow-violet-500/20"
+                            : "bg-blue-500/20 text-blue-300 border-blue-500/50 shadow-lg shadow-blue-500/20"
+                          : "bg-black/20 border-white/10 text-slate-400 hover:bg-white/5"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <div className="flex items-center gap-2 pt-3">
                 <button
                   type="submit"
                   disabled={actionLoading}
                   className="flex-1 py-3 rounded-xl text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 transition-colors shadow-lg shadow-indigo-600/30 cursor-pointer disabled:opacity-50"
                 >
-                  {actionLoading ? "جاري التعديل..." : "تحديث الاسم"}
+                  {actionLoading ? "جاري التعديل..." : "تحديث البيانات"}
                 </button>
                 <button
                   type="button"

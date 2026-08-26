@@ -1,11 +1,14 @@
 import React, { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { Lock, ShieldAlert, RefreshCw, KeyRound, Download, Upload, X, ShieldCheck, Eye, EyeOff, Users, UserPlus, Trash2, ChevronRight } from "lucide-react";
+import { Lock, ShieldAlert, RefreshCw, KeyRound, Download, Upload, X, ShieldCheck, Eye, EyeOff, Users, UserPlus, Trash2, ChevronRight, History } from "lucide-react";
 import { collection, query, where, getDocs, addDoc, deleteDoc, doc, onSnapshot } from "firebase/firestore";
 import { seedDatabaseIfEmpty, importDatabaseJSON } from "../lib/seedData";
 import { db } from "../lib/firebase";
 import { hashPassword } from "../lib/authUtils";
 import { AdminUser } from "../types";
+import ActivityLogView from "./ActivityLogView";
+
+const PRIMARY_ADMIN_USERNAME = "MinaRezk";
 
 interface AdminControlsProps {
   isAdmin: boolean;
@@ -33,9 +36,17 @@ export default function AdminControls({
   const [internalShowModal, setInternalShowModal] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
+  const [currentUsername, setCurrentUsername] = useState<string>(() => {
+    try {
+      return localStorage.getItem("reflect_admin_username") || "";
+    } catch (e) {
+      return "";
+    }
+  });
 
   // Manage admin accounts (add / delete)
   const [showManageAdmins, setShowManageAdmins] = useState(false);
+  const [showActivityLog, setShowActivityLog] = useState(false);
   const [adminUsersList, setAdminUsersList] = useState<AdminUser[]>([]);
   const [newAdminUsername, setNewAdminUsername] = useState("");
   const [newAdminPassword, setNewAdminPassword] = useState("");
@@ -53,6 +64,7 @@ export default function AdminControls({
     setUsername("");
     setPassword("");
     setShowManageAdmins(false);
+    setShowActivityLog(false);
   };
 
   const [isLoggingIn, setIsLoggingIn] = useState(false);
@@ -79,6 +91,7 @@ export default function AdminControls({
       const snap = await getDocs(q);
       if (!snap.empty) {
         setIsAdmin(true);
+        setCurrentUsername(sanitizedUsername);
         try {
           localStorage.setItem("reflect_admin_username", sanitizedUsername);
         } catch (e) {
@@ -98,6 +111,7 @@ export default function AdminControls({
 
   const handleLogout = () => {
     setIsAdmin(false);
+    setCurrentUsername("");
     try {
       localStorage.removeItem("reflect_admin_username");
     } catch (e) {
@@ -420,6 +434,18 @@ export default function AdminControls({
                     </button>
                   </form>
                 </div>
+              ) : showActivityLog ? (
+                /* Activity Log Sub-View — MinaRezk only */
+                <div className="space-y-4 pt-1">
+                  <button
+                    onClick={() => setShowActivityLog(false)}
+                    className="flex items-center gap-1.5 text-xs font-bold text-indigo-300 hover:text-white bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 px-3 py-1.5 rounded-xl transition-all cursor-pointer"
+                  >
+                    <ChevronRight className="w-3.5 h-3.5" />
+                    <span>رجوع</span>
+                  </button>
+                  <ActivityLogView />
+                </div>
               ) : (
               <div className="space-y-4 pt-1">
                 <div className="flex flex-col items-center text-center">
@@ -449,6 +475,24 @@ export default function AdminControls({
                     </div>
                     <span className="text-xs text-indigo-400 font-bold">👥</span>
                   </button>
+
+                  {currentUsername === PRIMARY_ADMIN_USERNAME && (
+                    <button
+                      onClick={() => setShowActivityLog(true)}
+                      className="w-full flex items-center justify-between p-3.5 bg-gradient-to-r from-amber-950/60 to-slate-900 border border-amber-500/30 rounded-2xl hover:border-amber-400 transition-all text-right cursor-pointer active:scale-98 shadow-md"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-300 flex items-center justify-center shrink-0">
+                          <History className="w-4 h-4 stroke-[2.5]" />
+                        </div>
+                        <div>
+                          <div className="text-xs font-black text-amber-200">سجل النشاط</div>
+                          <div className="text-[10px] text-slate-400 font-medium">مين ضاف نقط أو عدّل أي حاجة ومتى</div>
+                        </div>
+                      </div>
+                      <span className="text-xs text-amber-400 font-bold">📋</span>
+                    </button>
+                  )}
 
                   {onExportData && (
                     <button

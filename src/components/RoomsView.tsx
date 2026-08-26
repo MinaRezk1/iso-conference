@@ -19,10 +19,12 @@ import {
   Sliders,
   BedDouble
 } from "lucide-react";
-import { Room, Occupant } from "../types";
+import { Room, Occupant, PersonRole } from "../types";
 import { db } from "../lib/firebase";
 import { collection, addDoc, deleteDoc, doc, updateDoc, setDoc, writeBatch } from "firebase/firestore";
 import { syncRoomsWithLatest } from "../lib/seedData";
+import { logActivity } from "../lib/activityLog";
+import { ROLE_OPTIONS, roleLabel, isServantRole } from "../lib/roles";
 import { Home3D } from "./ThreeDIcons";
 
 interface RoomsViewProps {
@@ -56,7 +58,7 @@ export default function RoomsView({ rooms, isAdmin, onRefreshData }: RoomsViewPr
     }
   };
 
-  const [filterType, setFilterType] = useState<'all' | 'boys' | 'servants'>('all');
+  const [filterType, setFilterType] = useState<'all' | 'boys' | 'girls'>('all');
   const [searchTerm, setSearchTerm] = useState("");
   
   // Modals state
@@ -70,19 +72,19 @@ export default function RoomsView({ rooms, isAdmin, onRefreshData }: RoomsViewPr
   const [roomNumber, setRoomNumber] = useState("");
   const [building, setBuilding] = useState("");
   const [floor, setFloor] = useState("");
-  const [type, setType] = useState<'boys' | 'servants'>('boys');
+  const [type, setType] = useState<'boys' | 'girls'>('boys');
   const [capacity, setCapacity] = useState("4");
 
   // Form: Add Occupant
   const [occupantName, setOccupantName] = useState("");
-  const [occupantRole, setOccupantRole] = useState<'boy' | 'servant'>('boy');
+  const [occupantRole, setOccupantRole] = useState<PersonRole>('makhdoom');
 
   // Form: Move Occupant
   const [targetRoomId, setTargetRoomId] = useState("");
 
   // Form: Edit Occupant
   const [editOccupantName, setEditOccupantName] = useState("");
-  const [editOccupantRole, setEditOccupantRole] = useState<'boy' | 'servant'>('boy');
+  const [editOccupantRole, setEditOccupantRole] = useState<PersonRole>('makhdoom');
 
   // Stats calculation
   const totalRooms = rooms.length;
@@ -194,7 +196,9 @@ export default function RoomsView({ rooms, isAdmin, onRefreshData }: RoomsViewPr
       return;
     }
     try {
+      const roomToDelete = rooms.find((r) => r.id === id);
       await deleteDoc(doc(db, "rooms", id));
+      logActivity("حذف غرفة", roomToDelete ? `غرفة ${roomToDelete.roomNumber}` : id);
       onRefreshData();
     } catch (err) {
       console.error(err);
@@ -238,7 +242,12 @@ export default function RoomsView({ rooms, isAdmin, onRefreshData }: RoomsViewPr
       const updatedOccupants = [...currentOccupants, { name: occupantName.trim(), role: occupantRole }];
       const docRef = doc(db, "rooms", showAddOccupant.id);
       await setDoc(docRef, { occupants: updatedOccupants }, { merge: true });
-      
+
+      logActivity(
+        "تسكين شخص في غرفة",
+        `${occupantName.trim()} (${roleLabel(occupantRole)}) في غرفة ${showAddOccupant.roomNumber}`
+      );
+
       onRefreshData();
       setShowAddOccupant(null);
       setOccupantName("");
@@ -326,9 +335,14 @@ export default function RoomsView({ rooms, isAdmin, onRefreshData }: RoomsViewPr
     }
 
     try {
+      const removedPerson = (room.occupants || [])[indexToRemove];
       const updatedOccupants = (room.occupants || []).filter((_, idx) => idx !== indexToRemove);
       const docRef = doc(db, "rooms", room.id);
       await setDoc(docRef, { occupants: updatedOccupants }, { merge: true });
+      logActivity(
+        "إلغاء تسكين شخص",
+        `${removedPerson?.name || "شخص"} من غرفة ${room.roomNumber}`
+      );
       onRefreshData();
     } catch (err) {
       console.error(err);
@@ -418,13 +432,13 @@ export default function RoomsView({ rooms, isAdmin, onRefreshData }: RoomsViewPr
             onClick={() => setFilterType('boys')}
             className={`px-4 py-2 text-xs font-bold rounded-lg transition-colors cursor-pointer ${filterType === 'boys' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
           >
-            غرف الأولاد / المخدومين
+            غرف الأولاد
           </button>
           <button
-            onClick={() => setFilterType('servants')}
-            className={`px-4 py-2 text-xs font-bold rounded-lg transition-colors cursor-pointer ${filterType === 'servants' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
+            onClick={() => setFilterType('girls')}
+            className={`px-4 py-2 text-xs font-bold rounded-lg transition-colors cursor-pointer ${filterType === 'girls' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
           >
-            غرف الخدام
+            غرف البنات
           </button>
         </div>
       </div>
@@ -461,7 +475,7 @@ export default function RoomsView({ rooms, isAdmin, onRefreshData }: RoomsViewPr
                           room.type === 'boys' ? 'bg-blue-500/20 text-blue-300 border-blue-500/30' :
                           'bg-violet-500/20 text-violet-300 border-violet-500/30'
                         }`}>
-                          {room.type === 'boys' ? 'أولاد / مخدومين' : 'غرفة خدام'}
+                          {room.type === 'boys' ? 'غرفة أولاد' : 'غرفة بنات'}
                         </span>
 
                         {isAdmin && (
@@ -552,8 +566,14 @@ export default function RoomsView({ rooms, isAdmin, onRefreshData }: RoomsViewPr
                             <div className="flex items-center gap-2.5 truncate">
                               <User className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                               <span className="truncate font-bold text-white">{occ.name}</span>
-                              {occ.role === 'servant' && (
-                                <span className="text-[9px] bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded border border-indigo-500/30 font-bold">خادم</span>
+                              {occ.role && (
+                                <span className={`text-[9px] px-2 py-0.5 rounded border font-bold shrink-0 ${
+                                  isServantRole(occ.role)
+                                    ? "bg-indigo-500/20 text-indigo-300 border-indigo-500/30"
+                                    : "bg-white/10 text-slate-300 border-white/10"
+                                }`}>
+                                  {roleLabel(occ.role)}
+                                </span>
                               )}
                             </div>
 
@@ -682,21 +702,21 @@ export default function RoomsView({ rooms, isAdmin, onRefreshData }: RoomsViewPr
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1.5">نوع نزلاء الغرفة</label>
+                <label className="block text-xs font-bold text-slate-300 mb-1.5">نوع الغرفة</label>
                 <div className="grid grid-cols-2 gap-3">
                   <button
                     type="button"
                     onClick={() => setType('boys')}
                     className={`py-2.5 text-xs font-bold rounded-xl border transition-colors cursor-pointer ${type === 'boys' ? 'bg-blue-500/20 text-blue-300 border-blue-500/50 shadow-lg shadow-blue-500/20' : 'bg-black/20 border-white/10 text-slate-400 hover:bg-white/5'}`}
                   >
-                    أولاد / مخدومين
+                    غرفة أولاد
                   </button>
                   <button
                     type="button"
-                    onClick={() => setType('servants')}
-                    className={`py-2.5 text-xs font-bold rounded-xl border transition-colors cursor-pointer ${type === 'servants' ? 'bg-violet-500/20 text-violet-300 border-violet-500/50 shadow-lg shadow-violet-500/20' : 'bg-black/20 border-white/10 text-slate-400 hover:bg-white/5'}`}
+                    onClick={() => setType('girls')}
+                    className={`py-2.5 text-xs font-bold rounded-xl border transition-colors cursor-pointer ${type === 'girls' ? 'bg-violet-500/20 text-violet-300 border-violet-500/50 shadow-lg shadow-violet-500/20' : 'bg-black/20 border-white/10 text-slate-400 hover:bg-white/5'}`}
                   >
-                    خدام
+                    غرفة بنات
                   </button>
                 </div>
               </div>
@@ -782,21 +802,21 @@ export default function RoomsView({ rooms, isAdmin, onRefreshData }: RoomsViewPr
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1.5">نوع نزلاء الغرفة</label>
+                <label className="block text-xs font-bold text-slate-300 mb-1.5">نوع الغرفة</label>
                 <div className="grid grid-cols-2 gap-3">
                   <button
                     type="button"
                     onClick={() => setType('boys')}
                     className={`py-2.5 text-xs font-bold rounded-xl border transition-colors cursor-pointer ${type === 'boys' ? 'bg-blue-500/20 text-blue-300 border-blue-500/50 shadow-lg shadow-blue-500/20' : 'bg-black/20 border-white/10 text-slate-400 hover:bg-white/5'}`}
                   >
-                    أولاد / مخدومين
+                    غرفة أولاد
                   </button>
                   <button
                     type="button"
-                    onClick={() => setType('servants')}
-                    className={`py-2.5 text-xs font-bold rounded-xl border transition-colors cursor-pointer ${type === 'servants' ? 'bg-violet-500/20 text-violet-300 border-violet-500/50 shadow-lg shadow-violet-500/20' : 'bg-black/20 border-white/10 text-slate-400 hover:bg-white/5'}`}
+                    onClick={() => setType('girls')}
+                    className={`py-2.5 text-xs font-bold rounded-xl border transition-colors cursor-pointer ${type === 'girls' ? 'bg-violet-500/20 text-violet-300 border-violet-500/50 shadow-lg shadow-violet-500/20' : 'bg-black/20 border-white/10 text-slate-400 hover:bg-white/5'}`}
                   >
-                    خدام
+                    غرفة بنات
                   </button>
                 </div>
               </div>
@@ -850,21 +870,23 @@ export default function RoomsView({ rooms, isAdmin, onRefreshData }: RoomsViewPr
 
               <div>
                 <label className="block text-xs font-bold text-slate-300 mb-1.5">الدور / الصفة</label>
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setOccupantRole('boy')}
-                    className={`py-2.5 text-xs font-bold rounded-xl border transition-colors cursor-pointer ${occupantRole === 'boy' ? 'bg-blue-500/20 text-blue-300 border-blue-500/50 shadow-lg shadow-blue-500/20' : 'bg-black/20 border-white/10 text-slate-400 hover:bg-white/5'}`}
-                  >
-                    مخدوم
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setOccupantRole('servant')}
-                    className={`py-2.5 text-xs font-bold rounded-xl border transition-colors cursor-pointer ${occupantRole === 'servant' ? 'bg-violet-500/20 text-violet-300 border-violet-500/50 shadow-lg shadow-violet-500/20' : 'bg-black/20 border-white/10 text-slate-400 hover:bg-white/5'}`}
-                  >
-                    خادم
-                  </button>
+                <div className="grid grid-cols-2 gap-2.5">
+                  {ROLE_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setOccupantRole(opt.value)}
+                      className={`py-2.5 text-xs font-bold rounded-xl border transition-colors cursor-pointer ${
+                        occupantRole === opt.value
+                          ? isServantRole(opt.value)
+                            ? "bg-violet-500/20 text-violet-300 border-violet-500/50 shadow-lg shadow-violet-500/20"
+                            : "bg-blue-500/20 text-blue-300 border-blue-500/50 shadow-lg shadow-blue-500/20"
+                          : "bg-black/20 border-white/10 text-slate-400 hover:bg-white/5"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
                 </div>
               </div>
 
@@ -915,21 +937,23 @@ export default function RoomsView({ rooms, isAdmin, onRefreshData }: RoomsViewPr
 
               <div>
                 <label className="block text-xs font-bold text-slate-300 mb-1.5">الدور / الصفة</label>
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setEditOccupantRole('boy')}
-                    className={`py-2.5 text-xs font-bold rounded-xl border transition-colors cursor-pointer ${editOccupantRole === 'boy' ? 'bg-blue-500/20 text-blue-300 border-blue-500/50 shadow-lg shadow-blue-500/20' : 'bg-black/20 border-white/10 text-slate-400 hover:bg-white/5'}`}
-                  >
-                    مخدوم
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setEditOccupantRole('servant')}
-                    className={`py-2.5 text-xs font-bold rounded-xl border transition-colors cursor-pointer ${editOccupantRole === 'servant' ? 'bg-violet-500/20 text-violet-300 border-violet-500/50 shadow-lg shadow-violet-500/20' : 'bg-black/20 border-white/10 text-slate-400 hover:bg-white/5'}`}
-                  >
-                    خادم
-                  </button>
+                <div className="grid grid-cols-2 gap-2.5">
+                  {ROLE_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setEditOccupantRole(opt.value)}
+                      className={`py-2.5 text-xs font-bold rounded-xl border transition-colors cursor-pointer ${
+                        editOccupantRole === opt.value
+                          ? isServantRole(opt.value)
+                            ? "bg-violet-500/20 text-violet-300 border-violet-500/50 shadow-lg shadow-violet-500/20"
+                            : "bg-blue-500/20 text-blue-300 border-blue-500/50 shadow-lg shadow-blue-500/20"
+                          : "bg-black/20 border-white/10 text-slate-400 hover:bg-white/5"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
                 </div>
               </div>
 
