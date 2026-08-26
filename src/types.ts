@@ -143,3 +143,47 @@ export interface ConferenceGroup {
   members: ConferenceMember[];
 }
 
+export interface PrayerSection {
+  id: string;
+  heading: string;
+  text: string;
+}
+
+export interface Prayer {
+  id: string;
+  title: string;
+  subtitle?: string;
+  order: number;
+  sections: PrayerSection[];
+}
+
+export interface QuizQuestion {
+  id: string;
+  section: string; // e.g. "أولاً: اختر الإجابة الصحيحة"
+  order: number;
+  type: 'mcq' | 'text';
+  prompt: string;
+  options?: string[]; // for type = 'mcq'
+  correctOptionIndex?: number; // for type = 'mcq'
+  referenceAnswer?: string; // model/expected answer, shown to admin only
+}
+
+export interface QuizAnswer {
+  questionId: string;
+  type: 'mcq' | 'text';
+  selectedOptionIndex?: number;
+  textAnswer?: string;
+}
+
+export interface QuizSubmission {
+  id: string;
+  participantName: string;
+  groupId: string;
+  groupName: string;
+  answers: QuizAnswer[];
+  autoScore: number;
+  autoScoreMax: number;
+  manualScore?: number | null;
+  submittedAt: any; // Firestore Timestamp
+}
+

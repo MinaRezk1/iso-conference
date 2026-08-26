@@ -75,6 +75,7 @@ export default function TeamScoreDetailsModal({
   // Handle adding custom points specifically for this team
   const handleAddCustomPoints = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isAdmin) return;
     if (!customReason.trim()) {
       alert("الرجاء إدخال سبب أونشاط إضافة النقاط!");
       return;
@@ -126,6 +127,7 @@ export default function TeamScoreDetailsModal({
 
   // Start editing a log
   const handleStartEditLog = (log: ScoreLog) => {
+    if (!isAdmin) return;
     setEditingLogId(log.id);
     setEditLogName(log.activityName || "");
     const currentPts = Number((log.points as any)?.[team.id]) || 0;
@@ -135,6 +137,7 @@ export default function TeamScoreDetailsModal({
 
   // Save edited log points
   const handleSaveEditLog = async (log: ScoreLog) => {
+    if (!isAdmin) return;
     if (!editLogName.trim()) {
       alert("الرجاء إدخال اسم النشاط!");
       return;
@@ -180,6 +183,7 @@ export default function TeamScoreDetailsModal({
 
   // Delete points/log entry for this team
   const handleDeleteTeamLogPoints = async (log: ScoreLog) => {
+    if (!isAdmin) return;
     if (!window.confirm(`هل أنت متأكد من حذف نقاط فقرة "${log.activityName}" لهذا الفريق؟`)) {
       return;
     }

@@ -22,6 +22,7 @@ import {
 import { Room, Occupant } from "../types";
 import { db } from "../lib/firebase";
 import { collection, addDoc, deleteDoc, doc, updateDoc, setDoc, writeBatch } from "firebase/firestore";
+import { syncRoomsWithLatest } from "../lib/seedData";
 import { Home3D } from "./ThreeDIcons";
 
 interface RoomsViewProps {
@@ -31,6 +32,30 @@ interface RoomsViewProps {
 }
 
 export default function RoomsView({ rooms, isAdmin, onRefreshData }: RoomsViewProps) {
+  const [isSyncingRooms, setIsSyncingRooms] = useState(false);
+
+  const handleSyncRooms = async () => {
+    if (!isAdmin) return;
+    if (
+      !window.confirm(
+        "هيتم حذف كل الغرف الحالية نهائياً واستبدالها بقائمة الـ12 غرفة الرسمية (١٠١ - ١١٢) بأسماء فاضية. متأكد؟"
+      )
+    ) {
+      return;
+    }
+    setIsSyncingRooms(true);
+    try {
+      await syncRoomsWithLatest();
+      onRefreshData();
+      alert("تمت مزامنة الغرف بنجاح!");
+    } catch (err) {
+      console.error(err);
+      alert("حدث خطأ أثناء مزامنة الغرف.");
+    } finally {
+      setIsSyncingRooms(false);
+    }
+  };
+
   const [filterType, setFilterType] = useState<'all' | 'boys' | 'servants'>('all');
   const [searchTerm, setSearchTerm] = useState("");
   
@@ -100,6 +125,7 @@ export default function RoomsView({ rooms, isAdmin, onRefreshData }: RoomsViewPr
 
   const handleAddRoomSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isAdmin) return;
     if (!roomNumber || !building) {
       alert("الرجاء إدخال رقم الغرفة واسم المبنى!");
       return;
@@ -125,6 +151,7 @@ export default function RoomsView({ rooms, isAdmin, onRefreshData }: RoomsViewPr
 
   const handleEditRoomSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isAdmin) return;
     if (!showEditRoom) return;
     if (!roomNumber || !building) {
       alert("الرجاء إدخال رقم الغرفة واسم المبنى!");
@@ -149,6 +176,7 @@ export default function RoomsView({ rooms, isAdmin, onRefreshData }: RoomsViewPr
   };
 
   const handleQuickAdjustCapacity = async (room: Room, delta: number) => {
+    if (!isAdmin) return;
     const newCap = Math.max(1, room.capacity + delta);
     try {
       const docRef = doc(db, "rooms", room.id);
@@ -161,6 +189,7 @@ export default function RoomsView({ rooms, isAdmin, onRefreshData }: RoomsViewPr
   };
 
   const handleDeleteRoom = async (id: string) => {
+    if (!isAdmin) return;
     if (!window.confirm("هل أنت متأكد من حذف هذه الغرفة وكل المقيمين بها نهائياً؟")) {
       return;
     }
@@ -174,6 +203,7 @@ export default function RoomsView({ rooms, isAdmin, onRefreshData }: RoomsViewPr
   };
 
   const handleClearRoom = async (room: Room) => {
+    if (!isAdmin) return;
     if (!window.confirm(`هل أنت متأكد من إخلاء الغرفة ${room.roomNumber} وإزالة جميع الأشخاص المسكنين بها؟`)) {
       return;
     }
@@ -189,6 +219,7 @@ export default function RoomsView({ rooms, isAdmin, onRefreshData }: RoomsViewPr
 
   const handleAddOccupantSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isAdmin) return;
     if (!showAddOccupant) return;
     if (!occupantName.trim()) {
       alert("الرجاء إدخال اسم الشخص المسكن!");
@@ -225,6 +256,7 @@ export default function RoomsView({ rooms, isAdmin, onRefreshData }: RoomsViewPr
 
   const handleEditOccupantSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isAdmin) return;
     if (!showEditOccupant) return;
     if (!editOccupantName.trim()) {
       alert("الرجاء إدخال اسم الشخص!");
@@ -255,6 +287,7 @@ export default function RoomsView({ rooms, isAdmin, onRefreshData }: RoomsViewPr
 
   const handleMoveOccupantSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isAdmin) return;
     if (!showMoveOccupant) return;
     if (!targetRoomId) {
       alert("الرجاء اختيار الغرفة الجديدة لنقل الشخص إليها!");
@@ -287,6 +320,7 @@ export default function RoomsView({ rooms, isAdmin, onRefreshData }: RoomsViewPr
   };
 
   const handleRemoveOccupant = async (room: Room, indexToRemove: number) => {
+    if (!isAdmin) return;
     if (!window.confirm("هل أنت متأكد من إلغاء تسكين هذا الشخص من هذه الغرفة؟")) {
       return;
     }
@@ -317,13 +351,24 @@ export default function RoomsView({ rooms, isAdmin, onRefreshData }: RoomsViewPr
         </div>
 
         {isAdmin && (
-          <button
-            onClick={handleOpenAddRoom}
-            className="flex items-center gap-1.5 self-start glass-button px-5 py-3 text-xs tracking-wider"
-          >
-            <Plus className="w-4 h-4" />
-            <span>إضافة غرفة جديدة</span>
-          </button>
+          <div className="flex flex-wrap gap-2 self-start">
+            <button
+              onClick={handleOpenAddRoom}
+              className="flex items-center gap-1.5 glass-button px-5 py-3 text-xs tracking-wider"
+            >
+              <Plus className="w-4 h-4" />
+              <span>إضافة غرفة جديدة</span>
+            </button>
+            <button
+              onClick={handleSyncRooms}
+              disabled={isSyncingRooms}
+              className="flex items-center gap-1.5 px-5 py-3 text-xs tracking-wider rounded-2xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer"
+              title="حذف كل الغرف الحالية واستبدالها بالقائمة الرسمية الجديدة (١٠١-١١٢)"
+            >
+              <Eraser className="w-4 h-4" />
+              <span>{isSyncingRooms ? "جارٍ المزامنة..." : "استبدال بالقائمة الرسمية (12 غرفة)"}</span>
+            </button>
+          </div>
         )}
       </div>
 

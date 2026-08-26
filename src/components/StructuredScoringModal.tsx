@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { X, Award, Check, Minus, Trophy, Sparkles, Medal } from "lucide-react";
+import { X, Award, Check, Trophy, Sparkles, Medal } from "lucide-react";
 import { Team } from "../types";
 
 export type SessionCategory = "bible_study" | "workshop" | "lecture" | "custom";
@@ -21,6 +21,7 @@ interface ActivityPreset {
   name: string;
   badge?: string;
   defaultReason?: string;
+  maxPoints?: number; // for single-winner or independent per-group scoring (drives the quick "full points" button)
   ranks?: {
     r1: number;
     r2: number;
@@ -29,38 +30,85 @@ interface ActivityPreset {
   };
 }
 
+// تقييمات مؤتمر ISO - اجتماع شباب ٢٠٢٦
 const PRESET_ACTIVITIES: ActivityPreset[] = [
   {
+    name: "حضور القداس",
+    badge: "٢٠ درجة",
+    maxPoints: 20,
+    defaultReason: "تُعطى للمجموعة اللي حضر منها أكبر عدد في القداس"
+  },
+  {
+    name: "التجمع (صلاة/محاضرات)",
+    badge: "٢٠ - ١٥ - ١٠ - ٠",
+    defaultReason: "ترتيب المجموعات الأربعة حسب الالتزام والانضباط في التجمع",
+    ranks: { r1: 20, r2: 15, r3: 10, r4: 0 }
+  },
+  {
+    name: "تفاعل (دراسة الكتاب/المحاضرات)",
+    badge: "حتى ١٠ لكل مجموعة",
+    maxPoints: 10,
+    defaultReason: "الأسئلة توزع بالتساوي على كل المجموعات لتحقيق مبدأ تكافؤ الفرص"
+  },
+  {
+    name: "نظافة الغرف",
+    badge: "حتى ١٠ لكل مجموعة",
+    maxPoints: 10,
+    defaultReason: "لو أفراد الغرفة من مجموعات مختلفة، الدرجة تتضاف لكل واحد لمجموعته"
+  },
+  {
+    name: "حفظ اللحن (تسميع)",
+    badge: "٢٠ - ١٥ - ١٠ - ٥",
+    defaultReason: "تسميع اللحن للمجموعة كلها، وترتيب المستويات الأربعة",
+    ranks: { r1: 20, r2: 15, r3: 10, r4: 5 }
+  },
+  {
+    name: "أفضل سلوك فردي (ولد)",
+    badge: "٢٠ درجة لمجموعته",
+    maxPoints: 20,
+    defaultReason: "أفضل أخلاق وروح رياضية خلال المؤتمر - باتفاق وأخذ رأي كل الخدام"
+  },
+  {
+    name: "أفضل سلوك فردي (بنت)",
+    badge: "٢٠ درجة لمجموعتها",
+    maxPoints: 20,
+    defaultReason: "أفضل أخلاق وروح رياضية خلال المؤتمر - باتفاق وأخذ رأي كل الخدام"
+  },
+  {
+    name: "الألعاب التنافسية",
+    badge: "١٠ درجات / لعبة",
+    maxPoints: 10,
+    defaultReason: "للمجموعة الفائزة في اللعبة - يمكن تكرارها لأكتر من لعبة لو الوقت متاح"
+  },
+  {
     name: "الكنز",
-    badge: "100 - 75 - 50 - 25",
-    defaultReason: "توزيع نقاط مراكز لعبة البحث عن الكنز",
-    ranks: { r1: 100, r2: 75, r3: 50, r4: 25 }
+    badge: "٣٠ درجة",
+    maxPoints: 30,
+    defaultReason: "للمجموعة الفائزة بالكنز"
   },
   {
-    name: "لعبة الجريمة",
-    badge: "75 - 50 - 25 - 10",
-    defaultReason: "توزيع نقاط مراكز حل لغز مسرح الجريمة",
-    ranks: { r1: 75, r2: 50, r3: 25, r4: 10 }
+    name: "سكيب روم",
+    badge: "٣٠ درجة",
+    maxPoints: 30,
+    defaultReason: "للمجموعة الفائزة"
   },
   {
-    name: "المولد",
-    badge: "75 - 50 - 25 - 10",
-    defaultReason: "توزيع نقاط مراكز منافسات وألعاب المولد",
-    ranks: { r1: 75, r2: 50, r3: 25, r4: 10 }
+    name: "أفضل تنكر (ولد)",
+    badge: "٢٠ درجة لمجموعته",
+    maxPoints: 20,
+    defaultReason: "اختيار أفضل تنكر ولد في حفلة التنكر"
   },
   {
-    name: "الاسكتشات",
-    badge: "40 - 30 - 20 - 10",
-    defaultReason: "توزيع نقاط مراكز تقييم الاسكتشات والعروض",
-    ranks: { r1: 40, r2: 30, r3: 20, r4: 10 }
+    name: "أفضل تنكر (بنت)",
+    badge: "٢٠ درجة لمجموعتها",
+    maxPoints: 20,
+    defaultReason: "اختيار أفضل تنكر بنت في حفلة التنكر"
   },
-  { name: "أسئلة ومسابقات", defaultReason: "نقاط إجابة أسئلة ومسابقات" },
-  { name: "نقط حضور", defaultReason: "نقاط الالتزام ونسبة الحضور" },
-  { name: "بونص حضور مبكر", defaultReason: "بونص التواجد والحضور المبكر" },
-  { name: "دراسة الكتاب المقدس", defaultReason: "تقييم مشاركة وحفظ دراسة الكتاب المقدس" },
-  { name: "ورشة العمل والتطبيق", defaultReason: "تقييم إنتاج وتطبيق ورشة العمل" },
-  { name: "المحاضرة العامة", defaultReason: "تقييم تفاعل وانضباط المحاضرة العامة" },
-  { name: "بونص السرعة والتجمع", defaultReason: "بونص السرعة والانضباط في التجمع" }
+  {
+    name: "خصم / جزاء ➖",
+    badge: "أدخل رقم سالب",
+    defaultReason: "خصم درجات نتيجة مخالفة - اكتب رقم سالب (مثال: -5) في خانة المجموعة المطلوبة"
+  }
 ];
 
 const RANK_DEFINITIONS = [
@@ -111,28 +159,28 @@ export default function StructuredScoringModal({
     setActivityName(preset.name);
     setCustomNotes(preset.defaultReason || "");
 
-    // If preset has ranks, clear previous point assignments or reset
-    if (preset.ranks) {
-      const emptyRanks: { [key: string]: number } = {};
-      const emptyPts: { [key: string]: number } = {};
-      teams.forEach((t) => {
-        emptyRanks[t.id] = 0;
-        emptyPts[t.id] = 0;
-      });
-      setRanksMap(emptyRanks);
-      setPointsMap(emptyPts);
-    }
+    // Always reset point/rank assignments when switching activities, so
+    // points typed for a previous activity never get carried over and
+    // accidentally submitted under a different one.
+    const emptyRanks: { [key: string]: number } = {};
+    const emptyPts: { [key: string]: number } = {};
+    teams.forEach((t) => {
+      emptyRanks[t.id] = 0;
+      emptyPts[t.id] = 0;
+    });
+    setRanksMap(emptyRanks);
+    setPointsMap(emptyPts);
   };
 
   const handlePointsChange = (teamId: string, val: number) => {
-    const num = isNaN(val) ? 0 : Math.max(0, val);
+    const num = isNaN(val) ? 0 : val;
     setPointsMap((prev) => ({ ...prev, [teamId]: num }));
   };
 
   const handleAdjustPoints = (teamId: string, delta: number) => {
     setPointsMap((prev) => {
       const current = prev[teamId] || 0;
-      return { ...prev, [teamId]: Math.max(0, current + delta) };
+      return { ...prev, [teamId]: current + delta };
     });
   };
 
@@ -413,7 +461,6 @@ export default function StructuredScoringModal({
                       <div className="flex items-center gap-1 shrink-0">
                         <input
                           type="number"
-                          min={0}
                           value={currentScore}
                           onChange={(e) => handlePointsChange(team.id, parseInt(e.target.value) || 0)}
                           className="w-16 h-10 text-center font-mono font-black text-base bg-amber-500/10 border border-amber-500/40 rounded-xl text-amber-300 focus:outline-none focus:ring-2 focus:ring-amber-500"
@@ -448,15 +495,23 @@ export default function StructuredScoringModal({
                     )}
 
                     {/* Simple Increment Buttons */}
-                    <div className="flex items-center justify-between gap-1 pt-1 border-t border-white/5">
+                    <div className="flex items-center justify-between gap-1 pt-1 border-t border-white/5 flex-wrap">
                       <div className="flex items-center gap-1">
                         <button
                           type="button"
-                          onClick={() => handleAdjustPoints(team.id, -5)}
-                          className="w-7 h-7 rounded-lg bg-white/5 hover:bg-rose-500/20 text-slate-300 hover:text-rose-300 flex items-center justify-center cursor-pointer transition-colors"
-                          title="-5"
+                          onClick={() => handleAdjustPoints(team.id, -10)}
+                          className="px-2 py-1 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 text-xs font-mono font-bold cursor-pointer transition-colors"
+                          title="خصم ١٠"
                         >
-                          <Minus className="w-3.5 h-3.5" />
+                          -10
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleAdjustPoints(team.id, -5)}
+                          className="px-2 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 text-xs font-mono font-bold cursor-pointer transition-colors"
+                          title="خصم ٥"
+                        >
+                          -5
                         </button>
                         <button
                           type="button"
@@ -481,13 +536,24 @@ export default function StructuredScoringModal({
                         </button>
                       </div>
 
-                      <button
-                        type="button"
-                        onClick={() => handlePointsChange(team.id, 60)}
-                        className="px-2 py-1 rounded-lg bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 text-[11px] font-bold cursor-pointer transition-colors"
-                      >
-                        60 كاملة
-                      </button>
+                      <div className="flex items-center gap-1">
+                        {activePreset?.maxPoints !== undefined && (
+                          <button
+                            type="button"
+                            onClick={() => handlePointsChange(team.id, activePreset.maxPoints!)}
+                            className="px-2 py-1 rounded-lg bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 text-[11px] font-bold cursor-pointer transition-colors"
+                          >
+                            {activePreset.maxPoints} كاملة
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => handlePointsChange(team.id, 0)}
+                          className="px-2 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 text-[11px] font-bold cursor-pointer transition-colors"
+                        >
+                          صفر
+                        </button>
+                      </div>
                     </div>
                   </div>
                 );
@@ -497,46 +563,21 @@ export default function StructuredScoringModal({
 
           {/* 4. Mandatory Reason Note / تفاصيل النقاط */}
           <div className="space-y-2.5 bg-slate-950/60 p-3.5 rounded-2xl border border-indigo-500/30 shadow-inner">
-            <label className="block text-xs font-bold text-amber-300 flex items-center justify-between">
-              <span className="flex items-center gap-1.5">
-                <Award className="w-4 h-4 text-amber-400" />
-                <span>تفاصيل ونوع النقاط (اختر من القائمة) *</span>
-              </span>
-              <span className="text-[10px] text-slate-400 font-normal">قائمة الاختيارات</span>
+            <label className="block text-xs font-bold text-amber-300 flex items-center gap-1.5">
+              <Award className="w-4 h-4 text-amber-400" />
+              <span>تفاصيل/سبب النقاط *</span>
             </label>
+            <p className="text-[10px] text-slate-400 -mt-1">
+              بتتملى تلقائي لما تختار فقرة من فوق، وتقدر تعدلها زي ما تحب.
+            </p>
 
-            {/* Dropdown Select Menu */}
-            <div className="space-y-2">
-              <select
-                value={
-                  ["أسئلة ومسابقات", "نقط حضور", "بونص حضور مبكر", "نقاط إجابة أسئلة ومسابقات", "نقاط الالتزام ونسبة الحضور", "بونص التواجد والحضور المبكر"].includes(customNotes)
-                    ? customNotes
-                    : customNotes === "" ? "" : "CUSTOM"
-                }
-                onChange={(e) => {
-                  if (e.target.value === "CUSTOM") {
-                    setCustomNotes("");
-                  } else {
-                    setCustomNotes(e.target.value);
-                  }
-                }}
-                className="w-full px-3.5 py-3 rounded-xl border border-amber-500/40 bg-slate-900 text-amber-200 text-xs sm:text-sm font-bold outline-none focus:ring-2 focus:ring-amber-500 cursor-pointer shadow-md"
-              >
-                <option value="" disabled className="bg-slate-900 text-slate-400">-- اختر نوع/سبب النقاط من القائمة --</option>
-                <option value="أسئلة ومسابقات" className="bg-slate-900 text-amber-300 font-bold py-2">❓ أسئلة ومسابقات</option>
-                <option value="نقط حضور" className="bg-slate-900 text-indigo-300 font-bold py-2">📋 نقط حضور</option>
-                <option value="بونص حضور مبكر" className="bg-slate-900 text-emerald-300 font-bold py-2">⚡ بونص حضور مبكر</option>
-                <option value="CUSTOM" className="bg-slate-900 text-slate-300 font-bold py-2">✏️ سبب مخصص / كتابة تفاصيل أُخرى...</option>
-              </select>
-
-              <input
-                type="text"
-                value={customNotes}
-                onChange={(e) => setCustomNotes(e.target.value)}
-                placeholder="تأكيد أو تعديل تفاصيل النقاط (مثال: أسئلة، نقط حضور، بونص حضور مبكر...)"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-white/15 bg-black/50 text-slate-100 text-xs font-medium outline-none focus:ring-1 focus:ring-amber-500"
-              />
-            </div>
+            <input
+              type="text"
+              value={customNotes}
+              onChange={(e) => setCustomNotes(e.target.value)}
+              placeholder="اكتب سبب/تفاصيل النقاط..."
+              className="w-full px-3.5 py-2.5 rounded-xl border border-white/15 bg-black/50 text-slate-100 text-xs font-medium outline-none focus:ring-1 focus:ring-amber-500"
+            />
           </div>
 
         </form>

@@ -112,6 +112,7 @@ export default function AlhanView({ alhan, isAdmin, onRefreshData }: AlhanViewPr
 
   const handleDelete = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
+    if (!isAdmin) return;
     if (!window.confirm("هل أنت متأكد من حذف هذا اللحن نهائياً؟")) return;
     try {
       await deleteDoc(doc(db, "alhan", id));
@@ -124,6 +125,7 @@ export default function AlhanView({ alhan, isAdmin, onRefreshData }: AlhanViewPr
 
   const handleSaveHymn = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isAdmin) return;
     if (!title.trim()) {
       alert("يرجى كتابة عنوان اللحن");
       return;

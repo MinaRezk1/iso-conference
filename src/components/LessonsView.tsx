@@ -19,33 +19,37 @@ import {
   HelpCircle,
   CheckCircle2,
   Save,
-  Sparkles
+  Sparkles,
+  Trophy
 } from "lucide-react";
-import { Lesson } from "../types";
-import { db } from "../lib/firebase";
+import { Lesson, ConferenceGroup } from "../types";
+import { db, auth, ADMIN_EMAIL } from "../lib/firebase";
+import { signInWithEmailAndPassword } from "firebase/auth";
 import { collection, addDoc, deleteDoc, doc, updateDoc, setDoc } from "firebase/firestore";
 import { Book3D } from "./ThreeDIcons";
+import QuizView from "./QuizView";
 
 interface LessonsViewProps {
   lessons: Lesson[];
   isAdmin: boolean;
   setIsAdmin?: (val: boolean) => void;
   onRefreshData: () => void;
+  conferenceGroups: ConferenceGroup[];
 }
 
-export default function LessonsView({ lessons, isAdmin, setIsAdmin, onRefreshData }: LessonsViewProps) {
+export default function LessonsView({ lessons, isAdmin, setIsAdmin, onRefreshData, conferenceGroups }: LessonsViewProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [isEditing, setIsEditing] = useState<Lesson | null>(null);
   
-  // Tab control: "public" (الشباب) vs "staff" (الخدام)
-  const [subTab, setSubTab] = useState<"public" | "staff">("public");
+  // Tab control: "public" (الشباب) vs "staff" (الخدام) vs "quiz" (المسابقة)
+  const [subTab, setSubTab] = useState<"public" | "staff" | "quiz">("public");
 
   // Inline Auth Form States
-  const [inlineUsername, setInlineUsername] = useState("");
   const [inlinePassword, setInlinePassword] = useState("");
   const [inlineError, setInlineError] = useState("");
+  const [inlineLoggingIn, setInlineLoggingIn] = useState(false);
 
   // Form states
   const [title, setTitle] = useState("");
@@ -101,6 +105,7 @@ export default function LessonsView({ lessons, isAdmin, setIsAdmin, onRefreshDat
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isAdmin) return;
     if (!title || !content) {
       alert("الرجاء ملء عنوان الشرح والمحتوى الروحي!");
       return;
@@ -147,6 +152,7 @@ export default function LessonsView({ lessons, isAdmin, setIsAdmin, onRefreshDat
 
   const handleDelete = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
+    if (!isAdmin) return;
     if (!window.confirm("هل أنت متأكد من حذف هذا الشرح الدراسي نهائياً؟")) {
       return;
     }
@@ -162,23 +168,26 @@ export default function LessonsView({ lessons, isAdmin, setIsAdmin, onRefreshDat
     }
   };
 
-  const handleInlineLoginSubmit = (e: React.FormEvent) => {
+  const handleInlineLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!setIsAdmin) return;
-    const u = inlineUsername.trim();
     const p = inlinePassword.trim();
 
-    if (
-      (u === "مينا رزق" && p === "1218") ||
-      (u.toLowerCase() === "mina rezk" && p === "1218") ||
-      (u === "" && p === "1218")
-    ) {
+    if (!p) {
+      setInlineError("من فضلك ادخل كلمة المرور.");
+      return;
+    }
+
+    setInlineLoggingIn(true);
+    setInlineError("");
+    try {
+      await signInWithEmailAndPassword(auth, ADMIN_EMAIL, p);
       setIsAdmin(true);
-      setInlineError("");
-      setInlineUsername("");
       setInlinePassword("");
-    } else {
-      setInlineError("اسم المستخدم أو كلمة المرور غير صحيحة! حاول مجدداً.");
+    } catch (err) {
+      setInlineError("كلمة المرور غير صحيحة! حاول مجدداً.");
+    } finally {
+      setInlineLoggingIn(false);
     }
   };
 
@@ -239,11 +248,27 @@ export default function LessonsView({ lessons, isAdmin, setIsAdmin, onRefreshDat
             </span>
           )}
         </button>
+
+        <button
+          onClick={() => setSubTab("quiz")}
+          className={`flex items-center gap-2 px-6 py-3 rounded-t-xl text-xs sm:text-sm font-bold uppercase transition-all duration-300 cursor-pointer ${
+            subTab === "quiz"
+              ? "bg-amber-600/30 border-t border-x border-amber-400/50 text-white shadow-[0_-4px_15px_rgba(217,119,6,0.1)] backdrop-blur-md relative z-10"
+              : "bg-black/20 text-slate-400 hover:text-white border-t border-x border-white/5 relative top-1"
+          }`}
+        >
+          <Trophy className="w-4 h-4 text-amber-400" />
+          <span>مسابقة سفر الأمثال</span>
+        </button>
       </div>
 
       <div className="-mt-px relative z-0">
-      {/* Grid view: List & Content / Locked Screen for Staff tab */}
-      {subTab === "staff" && !isAdmin ? (
+      {/* Grid view: List & Content / Locked Screen for Staff tab / Quiz tab */}
+      {subTab === "quiz" ? (
+        <div className="bg-white/5 border border-white/10 rounded-2xl rounded-tr-none p-4 sm:p-6 backdrop-blur-sm">
+          <QuizView isAdmin={isAdmin} groups={conferenceGroups} />
+        </div>
+      ) : subTab === "staff" && !isAdmin ? (
         /* GORGEOUS LOCKED STATE PANEL */
         <div className="glass-panel p-8 sm:p-12 text-center max-w-xl mx-auto space-y-6 animate-fade-in border-t-0 rounded-tr-none">
           <div className="inline-flex bg-rose-500/10 text-rose-400 p-4 rounded-full border border-rose-500/30 shadow-[0_0_20px_rgba(244,63,94,0.2)]">
@@ -267,19 +292,6 @@ export default function LessonsView({ lessons, isAdmin, setIsAdmin, onRefreshDat
             <form onSubmit={handleInlineLoginSubmit} className="space-y-3.5 max-w-xs mx-auto">
               <div>
                 <input
-                  type="text"
-                  value={inlineUsername}
-                  onChange={(e) => {
-                    setInlineUsername(e.target.value);
-                    setInlineError("");
-                  }}
-                  placeholder="اسم المستخدم"
-                  className="w-full px-4 py-3 rounded-xl border border-slate-700/80 bg-slate-950/80 text-white text-right text-xs font-bold focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all placeholder-slate-500"
-                />
-              </div>
-
-              <div>
-                <input
                   type="password"
                   value={inlinePassword}
                   onChange={(e) => {
@@ -287,6 +299,7 @@ export default function LessonsView({ lessons, isAdmin, setIsAdmin, onRefreshDat
                     setInlineError("");
                   }}
                   placeholder="كلمة المرور"
+                  autoFocus
                   className="w-full px-4 py-3 rounded-xl border border-slate-700/80 bg-slate-950/80 text-white text-center font-mono font-bold text-xs tracking-wider focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all placeholder-slate-500"
                 />
               </div>
@@ -299,10 +312,11 @@ export default function LessonsView({ lessons, isAdmin, setIsAdmin, onRefreshDat
 
               <button
                 type="submit"
-                className="w-full py-3 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-indigo-600 via-indigo-500 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 transition-all shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 cursor-pointer active:scale-98"
+                disabled={inlineLoggingIn}
+                className="w-full py-3 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-indigo-600 via-indigo-500 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 disabled:opacity-60 disabled:cursor-not-allowed transition-all shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 cursor-pointer active:scale-98"
               >
                 <Unlock className="w-4 h-4 text-indigo-200" />
-                <span>فتح القسم وتفعيل وضع الخادم</span>
+                <span>{inlineLoggingIn ? "جارٍ التحقق..." : "فتح القسم وتفعيل وضع الخادم"}</span>
               </button>
             </form>
           </div>

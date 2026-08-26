@@ -65,19 +65,18 @@ export default function HomeView({
       {/* Hero Welcome Banner */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-950 via-slate-900 to-amber-950/60 p-6 sm:p-10 border border-indigo-500/30 shadow-2xl">
         <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-          <div className="space-y-2 max-w-2xl">
-            <div className="flex items-center gap-2">
-              <span className="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-400/40">
-                مؤتمر ISO 2026
-              </span>
-              <span className="px-3 py-1 rounded-full text-xs font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                كنيسة الشهيد مارمينا
-              </span>
-            </div>
-            <h1 className="text-2xl sm:text-4xl font-serif font-black text-white tracking-tight">
-              أهلاً بكم في مؤتمر ISO 🌟
+          <div className="space-y-2.5 max-w-2xl">
+            <span className="inline-flex px-3 py-1 rounded-full text-[11px] sm:text-xs font-black uppercase tracking-wider bg-indigo-500/20 text-indigo-300 border border-indigo-400/40">
+              اجتماع مارمرقس شباب الجامعة
+            </span>
+            <h1 className="text-3xl sm:text-5xl font-serif font-black text-white tracking-tight leading-tight">
+              مؤتمر <span className="text-amber-400">ISO</span>
             </h1>
-            <p className="text-xs sm:text-sm text-slate-300 font-medium leading-relaxed">
+            <div className="flex items-center gap-1.5 text-indigo-200/90">
+              <MapPin className="w-3.5 h-3.5 shrink-0 text-amber-400" />
+              <span className="text-xs sm:text-sm font-bold">كنيسة مارمينا — مدينة الأحلام</span>
+            </div>
+            <p className="text-xs sm:text-sm text-slate-300 font-medium leading-relaxed pt-1">
               معايير الجودة الروحية والشخصية لحياة الشاب المسيحي. تابع جدول اليومين، الألحان والترانيم، دراسات الكتاب، ومجموعات العمل لحظة بلحظة.
             </p>
           </div>

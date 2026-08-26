@@ -81,6 +81,7 @@ export default function HymnsView({ songs, isAdmin, onRefreshData }: HymnsViewPr
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isAdmin) return;
     if (!title.trim() || !lyrics.trim()) {
       alert("الرجاء ملء عنوان الترنيمة والكلمات!");
       return;

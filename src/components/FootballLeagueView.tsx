@@ -472,6 +472,7 @@ export default function FootballLeagueView({ teams: propTeams, isAdmin }: Footba
 
   const handleSaveAwards = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isAdmin) return;
     try {
       const payload: FootballAwards = {
         bestPlayer: editBestPlayer.trim(),
@@ -491,6 +492,7 @@ export default function FootballLeagueView({ teams: propTeams, isAdmin }: Footba
 
   // Switch Tournament Format Mode (League / Knockout / Hybrid)
   const handleFormatChange = async (newFormat: 'league' | 'knockout' | 'hybrid') => {
+    if (!isAdmin) return;
     try {
       const updatedConfig: TournamentConfig = {
         ...config,
@@ -506,6 +508,7 @@ export default function FootballLeagueView({ teams: propTeams, isAdmin }: Footba
 
   // Winner Tournament Maker: Auto-generate Fixtures (Round Robin or Knockout Bracket)
   const handleAutoGenerateSchedule = async () => {
+    if (!isAdmin) return;
     if (allTeams.length < 2) {
       alert("الرجاء التأكد من وجود فريقين على الأقل لتوليد جدول المباريات!");
       return;
@@ -677,6 +680,7 @@ export default function FootballLeagueView({ teams: propTeams, isAdmin }: Footba
   // Save / Submit Match
   const handleSubmitMatch = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isAdmin) return;
     if (team1Id === team2Id) {
       alert("الرجاء اختيار فريقين مختلفين للمباراة!");
       return;
@@ -731,6 +735,7 @@ export default function FootballLeagueView({ teams: propTeams, isAdmin }: Footba
   };
 
   const handleDeleteMatch = async (id: string) => {
+    if (!isAdmin) return;
     if (!window.confirm("هل أنت متأكد من حذف هذه المباراة نهائياً؟")) return;
     try {
       await deleteDoc(doc(db, "footballMatches", id));
@@ -744,6 +749,7 @@ export default function FootballLeagueView({ teams: propTeams, isAdmin }: Footba
   // Add Custom Team (Winner Maker Style)
   const handleAddCustomTeam = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isAdmin) return;
     if (!newTeamName.trim()) {
       alert("الرجاء إدخال اسم الفريق!");
       return;
@@ -919,27 +925,29 @@ export default function FootballLeagueView({ teams: propTeams, isAdmin }: Footba
             </div>
 
             <div className="flex items-center gap-2 bg-white/5 p-1 rounded-xl border border-white/10">
-              <button
-                onClick={() => handleFormatChange("league")}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
-                  config.format === "league" ? "bg-indigo-600 text-white shadow" : "text-slate-400 hover:text-white"
-                }`}
-              >
-                دوري كامل (النقاط)
-              </button>
-              <button
-                onClick={() => handleFormatChange("knockout")}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
-                  config.format === "knockout" ? "bg-indigo-600 text-white shadow" : "text-slate-400 hover:text-white"
-                }`}
-              >
-                خروج المغلوب (الأدوار الإقصائية)
-              </button>
-              <button
-                onClick={() => handleFormatChange("hybrid")}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
-                  config.format === "hybrid" ? "bg-indigo-600 text-white shadow" : "text-slate-400 hover:text-white"
-                }`}
+              {isAdmin ? (
+                <>
+                  <button
+                    onClick={() => handleFormatChange("league")}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+                      config.format === "league" ? "bg-indigo-600 text-white shadow" : "text-slate-400 hover:text-white"
+                    }`}
+                  >
+                    دوري كامل (النقاط)
+                  </button>
+                  <button
+                    onClick={() => handleFormatChange("knockout")}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+                      config.format === "knockout" ? "bg-indigo-600 text-white shadow" : "text-slate-400 hover:text-white"
+                    }`}
+                  >
+                    خروج المغلوب (الأدوار الإقصائية)
+                  </button>
+                  <button
+                    onClick={() => handleFormatChange("hybrid")}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+                      config.format === "hybrid" ? "bg-indigo-600 text-white shadow" : "text-slate-400 hover:text-white"
+                    }`}
               >
                 مجموعات + تصفيات
               </button>

@@ -16,12 +16,14 @@ import {
   Download,
   Upload,
   RefreshCw,
-  ShieldAlert
+  ShieldAlert,
+  Sun
 } from "lucide-react";
 import { db, auth } from "./lib/firebase";
 import { collection, onSnapshot, query, orderBy, doc, getDoc, updateDoc, deleteDoc, getDocs, writeBatch } from "firebase/firestore";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import IntroScreen from "./components/IntroScreen";
+import PrayersView from "./components/PrayersView";
 import { 
   seedDatabaseIfEmpty, 
   resetAllTeamScoresToZero, 
@@ -434,6 +436,7 @@ export default function App() {
   // Nav Links
   const navItems = [
     { id: "home", label: "الرئيسية", shortLabel: "الرئيسية", icon: Home },
+    { id: "prayers", label: "الصلوات", shortLabel: "الصلوات", icon: Sun },
     { id: "schedule", label: "البرنامج والجدول", shortLabel: "البرنامج", icon: Calendar3D },
     { id: "alhan", label: "الألحان القبطية", shortLabel: "الألحان", icon: CopticCross3D },
     { id: "songs", label: "ترانيم مؤتمر ISO", shortLabel: "الترانيم", icon: Music3D },
@@ -699,6 +702,9 @@ export default function App() {
                 setActiveTab={setActiveTab} 
               />
             )}
+            {activeTab === "prayers" && (
+              <PrayersView />
+            )}
             {activeTab === "schedule" && (
               <ScheduleView 
                 schedule={schedule} 
@@ -727,6 +733,7 @@ export default function App() {
                 isAdmin={isAdmin} 
                 setIsAdmin={setIsAdmin}
                 onRefreshData={handleRefreshData} 
+                conferenceGroups={conferenceGroups}
               />
             )}
             {activeTab === "groups" && (

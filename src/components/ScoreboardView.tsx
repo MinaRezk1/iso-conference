@@ -71,6 +71,7 @@ export default function ScoreboardView({ teams, scoreLogs, isAdmin, onRefreshDat
     breakdownNotes: string;
     notes: string;
   }) => {
+    if (!isAdmin) return;
     const batch = writeBatch(db);
 
     // 1. Add log
@@ -124,6 +125,7 @@ export default function ScoreboardView({ teams, scoreLogs, isAdmin, onRefreshDat
   const topScore = sortedTeams[0]?.totalScore || 1;
 
   const handleOpenAddLog = () => {
+    if (!isAdmin) return;
     setActivityName("");
     setNotes("");
     const initialMap: { [key: string]: string } = {};
@@ -135,6 +137,7 @@ export default function ScoreboardView({ teams, scoreLogs, isAdmin, onRefreshDat
   };
 
   const handleOpenEditTeam = (team: Team) => {
+    if (!isAdmin) return;
     setEditName(team.name);
     setEditLogo(team.logo || "🔴");
     setEditColor(team.color || "#f43f5e");
@@ -143,6 +146,7 @@ export default function ScoreboardView({ teams, scoreLogs, isAdmin, onRefreshDat
 
   const handleSaveTeamEdit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isAdmin) return;
     if (!showEditTeam) return;
     if (!editName.trim()) {
       alert("الرجاء كتابة اسم الفريق!");
@@ -166,6 +170,7 @@ export default function ScoreboardView({ teams, scoreLogs, isAdmin, onRefreshDat
 
   const handleAddTeamSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isAdmin) return;
     if (!newTeamName.trim()) {
       alert("الرجاء كتابة اسم الفريق الجديد!");
       return;
@@ -190,6 +195,7 @@ export default function ScoreboardView({ teams, scoreLogs, isAdmin, onRefreshDat
   };
 
   const handleDeleteTeam = async (team: Team) => {
+    if (!isAdmin) return;
     if (!window.confirm(`هل أنت متأكد من حذف فريق "${team.name}" نهائياً؟`)) {
       return;
     }
@@ -204,6 +210,7 @@ export default function ScoreboardView({ teams, scoreLogs, isAdmin, onRefreshDat
 
   const handleAddLog = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isAdmin) return;
     if (!activityName.trim()) {
       alert("الرجاء إدخال اسم الفقرة أو النشاط!");
       return;
@@ -256,6 +263,7 @@ export default function ScoreboardView({ teams, scoreLogs, isAdmin, onRefreshDat
   };
 
   const handleDeleteLog = async (log: ScoreLog) => {
+    if (!isAdmin) return;
     if (!window.confirm(`هل أنت متأكد من حذف سكور فقرة "${log.activityName}"؟ سيتم خصم هذه النقاط تلقائياً من إجمالي الفرق.`)) {
       return;
     }
@@ -301,13 +309,15 @@ export default function ScoreboardView({ teams, scoreLogs, isAdmin, onRefreshDat
 
         {/* Action Controls */}
         <div className="flex items-center gap-2 flex-wrap w-full sm:w-auto">
-          <button
-            onClick={handleOpenAddLog}
-            className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-4 py-2.5 bg-gradient-to-r from-amber-500 via-emerald-500 to-teal-500 hover:from-amber-400 hover:to-teal-400 text-slate-950 font-black rounded-xl text-xs sm:text-sm transition-all shadow-lg shadow-emerald-500/20 cursor-pointer active:scale-95 border border-amber-300/40"
-          >
-            <Plus className="w-4 h-4 stroke-[3]" />
-            <span>إضافة نقاط ➕</span>
-          </button>
+          {isAdmin && (
+            <button
+              onClick={handleOpenAddLog}
+              className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-4 py-2.5 bg-gradient-to-r from-amber-500 via-emerald-500 to-teal-500 hover:from-amber-400 hover:to-teal-400 text-slate-950 font-black rounded-xl text-xs sm:text-sm transition-all shadow-lg shadow-emerald-500/20 cursor-pointer active:scale-95 border border-amber-300/40"
+            >
+              <Plus className="w-4 h-4 stroke-[3]" />
+              <span>إضافة نقاط ➕</span>
+            </button>
+          )}
 
           <button
             onClick={() => setShowPointsModal(true)}

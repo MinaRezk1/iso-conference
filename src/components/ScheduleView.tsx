@@ -221,6 +221,7 @@ export default function ScheduleView({ schedule, teams, isAdmin, onRefreshData }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isAdmin) return;
     if (!title || !time) {
       alert("الرجاء ملء عنوان الفقرة والوقت!");
       return;
@@ -272,6 +273,7 @@ export default function ScheduleView({ schedule, teams, isAdmin, onRefreshData }
     breakdownNotes: string;
     notes: string;
   }) => {
+    if (!isAdmin) return;
     if (!scoringEvent) return;
 
     try {
@@ -334,6 +336,7 @@ export default function ScheduleView({ schedule, teams, isAdmin, onRefreshData }
   // Handle Saving Event Scores by Servant
   const handleSaveEventScores = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isAdmin) return;
     if (!scoringEvent) return;
 
     if (!servantName.trim()) {
@@ -409,6 +412,7 @@ export default function ScheduleView({ schedule, teams, isAdmin, onRefreshData }
   };
 
   const handleDelete = async (id: string) => {
+    if (!isAdmin) return;
     if (!window.confirm("هل أنت متأكد من حذف هذه الفقرة نهائياً من البرنامج؟")) {
       return;
     }
@@ -422,6 +426,7 @@ export default function ScheduleView({ schedule, teams, isAdmin, onRefreshData }
   };
 
   const handleToggleCompleted = async (event: EventSchedule) => {
+    if (!isAdmin) return;
     try {
       const docRef = doc(db, "schedule", event.id);
       await updateDoc(docRef, {

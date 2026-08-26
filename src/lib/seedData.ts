@@ -7,7 +7,8 @@ import {
   doc, 
   writeBatch 
 } from "firebase/firestore";
-import { Team, EventSchedule, Song, CopticHymn, Lesson, Room, ScoreLog, ConferenceGroup } from "../types";
+import { Team, EventSchedule, Song, CopticHymn, Lesson, Room, ScoreLog, ConferenceGroup, QuizQuestion } from "../types";
+import { INITIAL_PRAYERS } from "./prayersData";
 
 export const INITIAL_CONFERENCE_GROUPS: ConferenceGroup[] = [
   {
@@ -252,59 +253,233 @@ export const INITIAL_ALHAN: CopticHymn[] = [
   }
 ];
 
+export const INITIAL_QUIZ_QUESTIONS: QuizQuestion[] = [
+  // أولاً: اختر الإجابة الصحيحة (MCQ)
+  {
+    id: "q1",
+    section: "أولاً: اختر الإجابة الصحيحة",
+    order: 1,
+    type: "mcq",
+    prompt: "الحكمة بنت بيتها من:",
+    options: ["سبعة أعمدة", "خمسة أعمدة", "عشرة أعمدة", "ثلاثة أعمدة"],
+    correctOptionIndex: 0
+  },
+  {
+    id: "q2",
+    section: "أولاً: اختر الإجابة الصحيحة",
+    order: 2,
+    type: "mcq",
+    prompt: "ذبحت الحكمة:",
+    options: ["خرافها", "ذبائحها", "عجولها", "طيورها"],
+    correctOptionIndex: 1
+  },
+  {
+    id: "q3",
+    section: "أولاً: اختر الإجابة الصحيحة",
+    order: 3,
+    type: "mcq",
+    prompt: "قالت الحكمة لناقصي الفهم أن يتركوا .................... فيحيوا.",
+    options: ["الجبال", "الجهالات", "أبواب الهيكل", "الطعام"],
+    correctOptionIndex: 1
+  },
+  {
+    id: "q4",
+    section: "أولاً: اختر الإجابة الصحيحة",
+    order: 4,
+    type: "mcq",
+    prompt: "جلست المرأة الجاهلة عند:",
+    options: ["باب بيتها", "كرسي في المدينة", "أبواب بيتها", "باب الهيكل"],
+    correctOptionIndex: 0
+  },
+  {
+    id: "q5",
+    section: "أولاً: اختر الإجابة الصحيحة",
+    order: 5,
+    type: "mcq",
+    prompt: "تنادى المرأة الجاهلة .................... المقومون طرقهم.",
+    options: ["الحكماء", "الأخيلة", "عابري السبيل", "جواريها"],
+    correctOptionIndex: 2
+  },
+  // ثانياً: أكمل الآيات (fill in the blank)
+  {
+    id: "q6",
+    section: "ثانياً: أكمل الآيات",
+    order: 6,
+    type: "text",
+    prompt: "الحكمة بنت بيتها، .................... أعمدتها.",
+    referenceAnswer: "نحتت"
+  },
+  {
+    id: "q7",
+    section: "ثانياً: أكمل الآيات",
+    order: 7,
+    type: "text",
+    prompt: "ذبحت ذبائحها، مزجت ....................",
+    referenceAnswer: "خمرها"
+  },
+  {
+    id: "q8",
+    section: "ثانياً: أكمل الآيات",
+    order: 8,
+    type: "text",
+    prompt: "أرسلت جواريها تنادي على ....................",
+    referenceAnswer: "ظهور أعالي المدينة"
+  },
+  {
+    id: "q9",
+    section: "ثانياً: أكمل الآيات",
+    order: 9,
+    type: "text",
+    prompt: "من يوخب مستهزئًا يكسب لنفسه ....................",
+    referenceAnswer: "هوانًا"
+  },
+  {
+    id: "q10",
+    section: "ثانياً: أكمل الآيات",
+    order: 10,
+    type: "text",
+    prompt: "وخب حكيمًا فيحبك، أعطِ حكيمًا ....................",
+    referenceAnswer: "فيكون أوفر حكمة"
+  },
+  // ثالثاً: استخرج من الإصحاح العاشر (find the verse)
+  {
+    id: "q11",
+    section: "ثالثاً: استخرج من الإصحاح العاشر",
+    order: 11,
+    type: "text",
+    prompt: "آية تتحدث عن الابن الحكيم",
+    referenceAnswer: "الابن الحكيم يسر أباه، والابن الجاهل حزن أمه."
+  },
+  {
+    id: "q12",
+    section: "ثالثاً: استخرج من الإصحاح العاشر",
+    order: 12,
+    type: "text",
+    prompt: "آية تتحدث عن الكسل",
+    referenceAnswer: "العامل بيد رخوة يفتقر، أما يد المجتهدين فتغني."
+  },
+  {
+    id: "q13",
+    section: "ثالثاً: استخرج من الإصحاح العاشر",
+    order: 13,
+    type: "text",
+    prompt: "آية تتحدث عن المحبة",
+    referenceAnswer: "البغضة تهيج خصومات، والمحبة تستر كل الذنوب."
+  },
+  {
+    id: "q14",
+    section: "ثالثاً: استخرج من الإصحاح العاشر",
+    order: 14,
+    type: "text",
+    prompt: "آية تتحدث عن كثرة الكلام",
+    referenceAnswer: "كثرة الكلام لا تخلو من معصية، أما الضابط شفتيه فعاقل."
+  },
+  {
+    id: "q15",
+    section: "ثالثاً: استخرج من الإصحاح العاشر",
+    order: 15,
+    type: "text",
+    prompt: "آية تتحدث عن النميمة",
+    referenceAnswer: "من يخفي البغضة فشفتاه كاذبتان، ومشيع المذمة هو جاهل."
+  },
+  // رابعاً: أسئلة تركيز (comprehension)
+  {
+    id: "q16",
+    section: "رابعاً: أسئلة تركيز",
+    order: 16,
+    type: "text",
+    prompt: "ماذا تستر المحبة؟",
+    referenceAnswer: "كل الذنوب."
+  },
+  {
+    id: "q17",
+    section: "رابعاً: أسئلة تركيز",
+    order: 17,
+    type: "text",
+    prompt: "متى يحصد العاقل؟",
+    referenceAnswer: "العاقل يجمع في الصيف (وقت الحصاد) نتيجة ما تعب فيه طوال العام (ماديًا وروحيًا)."
+  },
+  {
+    id: "q18",
+    section: "رابعاً: أسئلة تركيز",
+    order: 18,
+    type: "text",
+    prompt: "ماذا يحدث لمن ينام في الحصاد؟",
+    referenceAnswer: "لن يحصد أي نتيجة لأنه ابن مخزٍ."
+  },
+  {
+    id: "q19",
+    section: "رابعاً: أسئلة تركيز",
+    order: 19,
+    type: "text",
+    prompt: "متى تكون محبة المال شرًا، بحسب مبادئ الإصحاح؟",
+    referenceAnswer: "عندما نحصل عليه عن طريق الشر (كنوز الشر لا تنفع)، ونبتعد عن طريق البر."
+  },
+  {
+    id: "q20",
+    section: "رابعاً: أسئلة تركيز",
+    order: 20,
+    type: "text",
+    prompt: "أيهما أكثر ارتباطًا بالحكمة: كثرة الكلام أم ضبط اللسان؟",
+    referenceAnswer: "ضبط اللسان، لأن ضابط شفتيه عاقل، أما كثرة الكلام لا تخلو من المعصية."
+  }
+];
+
 export const INITIAL_LESSONS: Lesson[] = [
   {
     id: "lesson_manual_day1",
-    title: "دراسة كتاب اليوم الأول: سفر الأمثال (أصحاح 9 و 10)",
+    title: "ملخص دراسة كتاب اليوم الأول: نداء الحكمة ونداء الحماقة",
     speaker: "خدام دراسة الكتاب",
     day: 1,
     isStaffOnly: false,
-    content: `دراسة كتاب اليوم الأول: سفر الأمثال (أصحاح 9 و 10)
+    content: `ملخص دراسة كتاب اليوم الأول: نداء الحكمة ونداء الحماقة
 مؤتمر ISO 2026
 
-الهدف:
-الهدف من دراسة سفر الأمثال أصحاحي 9 و 10 هو إدراك مفهوم الحكمة الحقيقية وكيف نبني حياتنا على أساس سليم كمعيار جودة حقيقي (ISO) لحياة الشاب المسيحي.
-
-أولاً: مقارنة بين وليمة الحكمة ووليمة الحماقة (أمثال 9):
-- الحكمة بنت بيتها ونحتت أعمدتها السبعة وذبحت ذبحها ومزجت خمرها ورتبت مائدتها (أم 9: 1-2).
-- دعوة الحكمة: "من هو جاهل فليمل إلى هنا، وللناقص الفهم قالت: تعالوا كلوا من طعامي واشربوا من الخمر التي مزجتها. اتركوا الجهالات فتحيوا، وسيروا في طريق الفهم" (أم 9: 4-6).
-- في المقابل المرأة الحمقاء الصخابة الجاهلة التي تنادي العابرين قائلة: "المياه المسروقة حلوة وخبز الخفية لذيذ، ولا يعلم أن الأخيلة هناك وأن في أعماق الهاوية ضيوفها" (أم 9: 17-18).
-
-ثانياً: معايير السلوك والبركة في الحياة العملية (أمثال 10):
-- "الابن الحكيم يسر أباه والابن الجاهل حزن أمه" (أم 10: 1).
-- "كنوز الشر لا تنفع، أما البر فينجي من الموت" (أم 10: 2).
-- "العامل بيد رخوة يفتقر، أما يد المجتهدين فتغني" (أم 10: 4).
-- "بركة الرب هي تغني ولا يزيد معها تعباً" (أم 10: 22).
-
-أسئلة وتطبيقات للمجموعات:
-س1: ما هي الأعمدة السبعة التي تبني بها الحكمة بيتها في حياتك؟
-س2: كيف تفرق بين دعوة الحكمة الحقيقية والإغراءات الزائفة في العالم المحيط بك؟
-س3: استخرج 3 آيات من أصحاح 10 تمثل معايير واضحة لسلوكيات الشاب الناجح مع الله.`
+- الله يفرح بمن يطلب الحكمة.
+- الحكمة هي الالتصاق بمصدر الحكمة.
+- صفنيا (1: 7): "لأن الرب قد أعدّ ذبيحة" (الحكمة صفة أقنومية).
+- الفكر المسيحي: الحكمة ليست كمّ معلومات.
+- "مخافة الرب رأس المعرفة" (أمثال 1)، و"بدء الحكمة مخافة الله" (أمثال 9).
+- الحكمة تجعلك تراجع خططك.
+- علشان تعرف إن الحكمة بدأت فيك: في كل قرار، اسأل نفسك هل يرضي الله أم لا.
+- بالحكمة والصلاة نتعلم مع من نتكلم، ومن نكتفي بالصلاة من أجله ("وبّخ الحكيم يحبك، الجاهل يبغضك").
+- فرح الله بسليمان حين طلب الحكمة، أما رفقة فأحزن قلبها حماقة ابنها عيسو.
+- البرّ ينجي من الموت: مثال نوح ومردخاي.
+- من يتعلم الحكمة في شبابه لن يخجل وهو كبير السن.
+- اللسان يقود الحياة: لو تقدّس اللسان بالتسبيح يتقدّس القلب؛ ما تقوله يفصح عمّا في قلبك.
+- الجاهل يفعل الخطية بسرور لأنه أعمى.
+- الشرير لا يعرف معنى السلام الداخلي مهما تظاهر بعكس ذلك؛ الشر مُهلك، والبرّ ينجي صاحبه.
+- الكتاب المقدس لا يساند الكسلان.`
   },
   {
     id: "lesson_manual_day2",
-    title: "دراسة كتاب اليوم الثاني: سفر يشوع بن سيراخ (أصحاح 48 و 49)",
+    title: "دراسة كتاب اليوم الثاني: الحكمة في الكتاب المقدس",
     speaker: "خدام دراسة الكتاب",
     day: 2,
     isStaffOnly: false,
-    content: `دراسة كتاب اليوم الثاني: سفر يشوع بن سيراخ (أصحاح 48 و 49)
+    content: `دراسة كتاب اليوم الثاني: الحكمة في الكتاب المقدس
 مؤتمر ISO 2026
 
-الهدف:
-استعراض نماذج الأبطال ورجال الله القديسين (إيليا، إليشع، حزقيا، إشعياء، يوشيا، زربابل، يشوع بن يوصاداق، ونحميا) كمعايير حية للشهادة والأمانة في خدمة الله.
+هل سألت نفسك يوماً كيف خُلق العالم، وكيف تدور الأفلاك في نظام عجيب؟ هل تعرف شيئاً عن الحكمة، وكيف كانت، ومتى بدأت في العالم؟
 
-أولاً: أبطال الإيمان في أصحاح 48:
-- إيليا النبي الناري: "وقام إيليا النبي كالنار وتوقد كلامه كالمشعل" (سيراخ 48: 1).
-- إليشع النبي وقوة الروح المضاعفة: "ولما توارى إيليا في العاصفة، امتلك إليشع روحه، وفي أيامه لم يتزعزع من ذي سلطان ولم يستولِ عليه أحد" (سيراخ 48: 12-13).
-- حزقيا الملك وإشعياء النبي: ثبات الإيمان في وقت الحصار والضيقة ونجاة أورشليم.
+هل الحكمة لها بيت؟ وعلى أي أساس بُني هذا البيت؟
+من هو الحكيم؟ وما الفرق بينه وبين الجاهل؟
+لماذا يجب أن أبحث عن الحكمة وأقتنيها؟ وهل من فائدة تعود عليّ عندما أقتنيها؟ وهل تحدث فرقاً بيني وبين أصدقائي؟
 
-ثانياً: قادة التجديد والإصلاح في أصحاح 49:
-- يوشيا الملك: ذكر يوشيا كتركيب البخور المستطاب، كيف وجه قلبه إلى الرب في أيام الأثمة.
-- إرميا وحزقيال وزربابل ونحميا: إعادة بناء الأسوار وترميم الهيكل والتمسك بالعهد الإلهي.
+إذا أردنا أن نقتني الحكمة، فتعالوا نُبحر بين ضفتي الكتاب المقدس لنتعرف على الحكمة، وكيف نطلبها، ومن القادر أن يعطينا إياها، وما الفرق بين الحكيم والجاهل.
 
-تأملات وأسئلة عملية:
-س1: كيف أوقد إيليا كلامه كالمشعل؟ وكيف يكون كلامك وشاهدتك للرب مشعل نور وسط جيلك؟
-س2: ما هي الصفة المشتركة بين قادة الإصلاح في أصحاح 49 التي نحتاجها اليوم في كنيستنا وحياتنا؟`
+تعالوا معاً في هذه الرحلة:
+- نذهب إلى إيليا النبي الناري ونسأله عن الحكمة والغيرة على الله.
+- نسأل نحميا، الإداري الجبار، الذي وضع بحكمته أسساً في علم الإدارة.
+- لا ننسى أبيجايل، المرأة الحكيمة، التي حفظت بيتها بحكمتها في أشد اللحظات.
+- نسأل موسى كيف عبر بالشعب الغليظ الرقبة البحر الأحمر وبرية سيناء بحكمة من عند الله.
+
+تعالوا نتعرف معاً على معايير الحكمة كما جاءت في الكتاب المقدس.
+
+أسئلة وتطبيقات للمجموعات:
+س1: من هؤلاء الأبطال (إيليا، نحميا، أبيجايل، موسى)، من الأقرب إلى قلبك؟ ولماذا؟
+س2: ما الفرق العملي بين تصرف الحكيم وتصرف الجاهل في موقف واجهته أنت شخصياً؟
+س3: ما هي أول خطوة عملية تقدر تعملها هذا الأسبوع لتقتني الحكمة أكثر في حياتك؟`
   },
   {
     id: "lesson_lecture_day1_1",
@@ -413,87 +588,20 @@ export const INITIAL_LESSONS: Lesson[] = [
 ];
 
 export const INITIAL_ROOMS: Room[] = [
-  // Boys Rooms (1st Floor)
-  {
-    id: "room101",
-    roomNumber: "١٠١ (أولاد)",
-    building: "مبنى مارمرقس",
-    floor: "الدور الأول",
-    type: "boys",
-    capacity: 4,
-    occupants: [
-      { name: "مينا رأفت نعيم", role: "boy" },
-      { name: "بيتر سامح فايز", role: "boy" },
-      { name: "أنطونيوس مجدي", role: "boy" }
-    ]
-  },
-  {
-    id: "room102",
-    roomNumber: "١٠٢ (أولاد)",
-    building: "مبنى مارمرقس",
-    floor: "الدور الأول",
-    type: "boys",
-    capacity: 4,
-    occupants: [
-      { name: "فادي غالي لبيب", role: "boy" },
-      { name: "يوسف شريف نجيب", role: "boy" },
-      { name: "مارك إدوارد", role: "boy" },
-      { name: "كيرلس أيمن", role: "boy" }
-    ]
-  },
-  {
-    id: "room103",
-    roomNumber: "١٠٣ (خدام أولاد)",
-    building: "مبنى مارمرقس",
-    floor: "الدور الأول",
-    type: "servants",
-    capacity: 3,
-    occupants: [
-      { name: "أ. مينا مسيحة", role: "servant" },
-      { name: "أ. مايكل عاطف", role: "servant" }
-    ]
-  },
-
-  // Boys & Servants Rooms (2nd Floor)
-  {
-    id: "room201",
-    roomNumber: "٢٠١ (أولاد)",
-    building: "مبنى الأنبا أنطونيوس",
-    floor: "الدور الثاني",
-    type: "boys",
-    capacity: 4,
-    occupants: [
-      { name: "ماركو هاني صبري", role: "boy" },
-      { name: "استيفان رأفت شفيق", role: "boy" },
-      { name: "ماريو عماد فؤاد", role: "boy" }
-    ]
-  },
-  {
-    id: "room202",
-    roomNumber: "٢٠٢ (أولاد)",
-    building: "مبنى الأنبا أنطونيوس",
-    floor: "الدور الثاني",
-    type: "boys",
-    capacity: 4,
-    occupants: [
-      { name: "جون سمير حليم", role: "boy" },
-      { name: "كيرلس مدحت", role: "boy" },
-      { name: "مارتن هاني", role: "boy" },
-      { name: "دانيال وجيه", role: "boy" }
-    ]
-  },
-  {
-    id: "room203",
-    roomNumber: "٢٠٣ (خدام)",
-    building: "مبنى الأنبا أنطونيوس",
-    floor: "الدور الثاني",
-    type: "servants",
-    capacity: 3,
-    occupants: [
-      { name: "أ. بيشوي فريد", role: "servant" },
-      { name: "أ. مينا عادل", role: "servant" }
-    ]
-  }
+  // الدور الأول - بيانات حقيقية من مخطط توزيع الغرف
+  // النوع والمبنى قيم مبدئية قابلة للتعديل من "تعديل الغرفة" في لوحة الأدمن
+  { id: "room101", roomNumber: "١٠١", building: "مبنى الإقامة", floor: "الدور الأول", type: "boys", capacity: 6, occupants: [] },
+  { id: "room102", roomNumber: "١٠٢", building: "مبنى الإقامة", floor: "الدور الأول", type: "boys", capacity: 6, occupants: [] },
+  { id: "room103", roomNumber: "١٠٣", building: "مبنى الإقامة", floor: "الدور الأول", type: "boys", capacity: 6, occupants: [] },
+  { id: "room104", roomNumber: "١٠٤", building: "مبنى الإقامة", floor: "الدور الأول", type: "boys", capacity: 6, occupants: [] },
+  { id: "room105", roomNumber: "١٠٥", building: "مبنى الإقامة", floor: "الدور الأول", type: "boys", capacity: 6, occupants: [] },
+  { id: "room106", roomNumber: "١٠٦", building: "مبنى الإقامة", floor: "الدور الأول", type: "boys", capacity: 6, occupants: [] },
+  { id: "room107", roomNumber: "١٠٧", building: "مبنى الإقامة", floor: "الدور الأول", type: "boys", capacity: 5, occupants: [] },
+  { id: "room108", roomNumber: "١٠٨", building: "مبنى الإقامة", floor: "الدور الأول", type: "boys", capacity: 3, occupants: [] },
+  { id: "room109", roomNumber: "١٠٩", building: "مبنى الإقامة", floor: "الدور الأول", type: "boys", capacity: 6, occupants: [] },
+  { id: "room110", roomNumber: "١١٠", building: "مبنى الإقامة", floor: "الدور الأول", type: "boys", capacity: 4, occupants: [] },
+  { id: "room111", roomNumber: "١١١", building: "مبنى الإقامة", floor: "الدور الأول", type: "boys", capacity: 6, occupants: [] },
+  { id: "room112", roomNumber: "١١٢", building: "مبنى الإقامة", floor: "الدور الأول", type: "boys", capacity: 6, occupants: [] }
 ];
 
 export const INITIAL_SCORE_LOGS: ScoreLog[] = [];
@@ -609,6 +717,64 @@ export async function seedConferenceGroupsIfEmpty() {
     }
   } catch (e) {
     console.error("Error seeding conference groups:", e);
+  }
+}
+
+export async function seedQuizQuestionsIfEmpty() {
+  try {
+    const quizRef = collection(db, "quizQuestions");
+    const snapshot = await getDocs(quizRef);
+    if (snapshot.empty) {
+      console.log("Quiz questions collection is empty. Seeding...");
+      const batch = writeBatch(db);
+      for (const q of INITIAL_QUIZ_QUESTIONS) {
+        const docRef = doc(db, "quizQuestions", q.id);
+        batch.set(docRef, q);
+      }
+      await batch.commit();
+      console.log("Quiz questions seeded successfully!");
+    }
+  } catch (e) {
+    console.error("Error seeding quiz questions:", e);
+  }
+}
+
+export async function seedPrayersIfEmpty() {
+  try {
+    const prayersRef = collection(db, "prayers");
+    const snapshot = await getDocs(prayersRef);
+    if (snapshot.empty) {
+      console.log("Prayers collection is empty. Seeding...");
+      const batch = writeBatch(db);
+      for (const p of INITIAL_PRAYERS) {
+        const docRef = doc(db, "prayers", p.id);
+        batch.set(docRef, p);
+      }
+      await batch.commit();
+      console.log("Prayers seeded successfully!");
+    }
+  } catch (e) {
+    console.error("Error seeding prayers:", e);
+  }
+}
+
+export async function syncRoomsWithLatest() {
+  try {
+    const roomsRef = collection(db, "rooms");
+    const snapshot = await getDocs(roomsRef);
+    const batch = writeBatch(db);
+    snapshot.forEach((docSnap) => {
+      batch.delete(docSnap.ref);
+    });
+    for (const r of INITIAL_ROOMS) {
+      const docRef = doc(db, "rooms", r.id);
+      batch.set(docRef, r);
+    }
+    await batch.commit();
+    console.log("Rooms synced with latest list successfully!");
+  } catch (e) {
+    console.error("Error syncing rooms:", e);
+    throw e;
   }
 }
 

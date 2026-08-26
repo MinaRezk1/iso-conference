@@ -1,16 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { X, Map, Search, Tent, Clapperboard, Trophy, Star, BookOpen, Wrench, Mic, Sparkles, Zap, Plus } from "lucide-react";
+import { X, Trophy, Star, Sparkles, Plus, Church, Users, BookOpen, DoorOpen, Music, Crown, Gamepad2, Map, Target, Smile, UserMinus } from "lucide-react";
 
 interface PointsDistributionModalProps {
   onClose: () => void;
   onOpenAddLog?: () => void;
 }
-
-const staggeredDelay = (index: number) => ({
-  animationDelay: `${index * 100}ms`,
-  opacity: 0,
-  animationFillMode: 'forwards' as const,
-});
 
 export default function PointsDistributionModal({ onClose, onOpenAddLog }: PointsDistributionModalProps) {
   const [showContent, setShowContent] = useState(false);
@@ -83,198 +77,137 @@ export default function PointsDistributionModal({ onClose, onOpenAddLog }: Point
 
         {/* Scrollable Content */}
         <div className="overflow-y-auto p-4 sm:p-6 space-y-6 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
-          
-          {/* Main Events Category */}
-          <div className="space-y-3">
-            <h3 className="text-sm font-black text-white/90 flex items-center gap-2 mb-2 px-1">
-              <div className="w-1 h-4 bg-amber-500 rounded-full shadow-[0_0_10px_rgba(245,158,11,0.5)]"></div>
-              الفقرات التنافسية الكبرى
-            </h3>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-              {/* 1. الكنز */}
-              <div className="group relative bg-gradient-to-b from-amber-500/10 via-black/40 to-black/60 p-4 rounded-xl border border-amber-500/20 hover:border-amber-500/40 transition-all duration-500 overflow-hidden flex flex-col gap-3 slide-up" style={staggeredDelay(1)}>
-                <div className="absolute top-0 right-0 left-0 h-1 bg-amber-500/50 group-hover:bg-amber-400 transition-colors"></div>
-                <div className="flex items-center gap-2.5">
-                  <div className="p-2 bg-amber-500/10 rounded-lg shrink-0 group-hover:scale-110 group-hover:bg-amber-500/20 transition-all duration-500">
-                    <Map className="w-5 h-5 text-amber-400" />
-                  </div>
-                  <h4 className="text-sm font-black text-white">البحث عن الكنز</h4>
-                </div>
-                <div className="grid grid-cols-2 gap-1.5 text-center mt-1">
-                  <span className="col-span-2 flex items-center justify-center gap-1.5 py-1.5 bg-gradient-to-r from-amber-400/20 to-amber-500/5 text-amber-300 font-black text-xs rounded border border-amber-400/30">🥇 الأول: 100</span>
-                  <span className="flex items-center justify-center gap-1 py-1 bg-slate-400/10 text-slate-300 font-bold text-[10px] rounded border border-slate-400/20">🥈 الثاني: 75</span>
-                  <span className="flex items-center justify-center gap-1 py-1 bg-orange-500/10 text-orange-300 font-bold text-[10px] rounded border border-orange-500/20">🥉 الثالث: 50</span>
-                  <span className="col-span-2 flex items-center justify-center gap-1 py-1 bg-blue-500/10 text-blue-300 font-bold text-[10px] rounded border border-blue-500/20">🏅 الرابع: 25</span>
-                </div>
-              </div>
 
-              {/* 2. الجريمة */}
-              <div className="group relative bg-gradient-to-b from-rose-500/10 via-black/40 to-black/60 p-4 rounded-xl border border-rose-500/20 hover:border-rose-500/40 transition-all duration-500 overflow-hidden flex flex-col gap-3 slide-up" style={staggeredDelay(2)}>
-                <div className="absolute top-0 right-0 left-0 h-1 bg-rose-500/50 group-hover:bg-rose-400 transition-colors"></div>
-                <div className="flex items-center gap-2.5">
-                  <div className="p-2 bg-rose-500/10 rounded-lg shrink-0 group-hover:scale-110 group-hover:bg-rose-500/20 transition-all duration-500">
-                    <Search className="w-5 h-5 text-rose-400" />
-                  </div>
-                  <h4 className="text-sm font-black text-white">لغز الجريمة</h4>
-                </div>
-                <div className="grid grid-cols-2 gap-1.5 text-center mt-1">
-                  <span className="col-span-2 flex items-center justify-center gap-1.5 py-1.5 bg-gradient-to-r from-rose-500/20 to-rose-600/5 text-rose-300 font-black text-xs rounded border border-rose-500/30">🥇 الأول: 75</span>
-                  <span className="flex items-center justify-center gap-1 py-1 bg-slate-400/10 text-slate-300 font-bold text-[10px] rounded border border-slate-400/20">🥈 الثاني: 50</span>
-                  <span className="flex items-center justify-center gap-1 py-1 bg-orange-500/10 text-orange-300 font-bold text-[10px] rounded border border-orange-500/20">🥉 الثالث: 25</span>
-                  <span className="col-span-2 flex items-center justify-center gap-1 py-1 bg-blue-500/10 text-blue-300 font-bold text-[10px] rounded border border-blue-500/20">🏅 الرابع: 10</span>
-                </div>
-              </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
 
-              {/* 3. المولد */}
-              <div className="group relative bg-gradient-to-b from-emerald-500/10 via-black/40 to-black/60 p-4 rounded-xl border border-emerald-500/20 hover:border-emerald-500/40 transition-all duration-500 overflow-hidden flex flex-col gap-3 slide-up" style={staggeredDelay(3)}>
-                <div className="absolute top-0 right-0 left-0 h-1 bg-emerald-500/50 group-hover:bg-emerald-400 transition-colors"></div>
-                <div className="flex items-center gap-2.5">
-                  <div className="p-2 bg-emerald-500/10 rounded-lg shrink-0 group-hover:scale-110 group-hover:bg-emerald-500/20 transition-all duration-500">
-                    <Tent className="w-5 h-5 text-emerald-400" />
-                  </div>
-                  <h4 className="text-sm font-black text-white">ألعاب المولد</h4>
-                </div>
-                <div className="grid grid-cols-2 gap-1.5 text-center mt-1">
-                  <span className="col-span-2 flex items-center justify-center gap-1.5 py-1.5 bg-gradient-to-r from-emerald-500/20 to-emerald-600/5 text-emerald-300 font-black text-xs rounded border border-emerald-500/30">🥇 الأول: 75</span>
-                  <span className="flex items-center justify-center gap-1 py-1 bg-slate-400/10 text-slate-300 font-bold text-[10px] rounded border border-slate-400/20">🥈 الثاني: 50</span>
-                  <span className="flex items-center justify-center gap-1 py-1 bg-orange-500/10 text-orange-300 font-bold text-[10px] rounded border border-orange-500/20">🥉 الثالث: 25</span>
-                  <span className="col-span-2 flex items-center justify-center gap-1 py-1 bg-blue-500/10 text-blue-300 font-bold text-[10px] rounded border border-blue-500/20">🏅 الرابع: 10</span>
-                </div>
+            {/* 1. حضور القداس */}
+            <div className="group bg-black/40 p-4 rounded-xl border border-white/10 hover:bg-black/60 transition-colors duration-300 flex flex-col gap-2.5 slide-up" style={{ animationDelay: "0ms" }}>
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-amber-500/10 rounded-lg text-amber-400 shrink-0"><Church className="w-4 h-4" /></div>
+                <h4 className="text-sm font-black text-white">حضور القداس</h4>
               </div>
-
-              {/* 4. الاسكتشات */}
-              <div className="group relative bg-gradient-to-b from-purple-500/10 via-black/40 to-black/60 p-4 rounded-xl border border-purple-500/20 hover:border-purple-500/40 transition-all duration-500 overflow-hidden flex flex-col gap-3 slide-up" style={staggeredDelay(4)}>
-                <div className="absolute top-0 right-0 left-0 h-1 bg-purple-500/50 group-hover:bg-purple-400 transition-colors"></div>
-                <div className="flex items-center gap-2.5">
-                  <div className="p-2 bg-purple-500/10 rounded-lg shrink-0 group-hover:scale-110 group-hover:bg-purple-500/20 transition-all duration-500">
-                    <Clapperboard className="w-5 h-5 text-purple-400" />
-                  </div>
-                  <h4 className="text-sm font-black text-white">عروض الاسكتشات</h4>
-                </div>
-                <div className="grid grid-cols-2 gap-1.5 text-center mt-1">
-                  <span className="col-span-2 flex items-center justify-center gap-1.5 py-1.5 bg-gradient-to-r from-purple-500/20 to-purple-600/5 text-purple-300 font-black text-xs rounded border border-purple-500/30">🥇 الأول: 40</span>
-                  <span className="flex items-center justify-center gap-1 py-1 bg-slate-400/10 text-slate-300 font-bold text-[10px] rounded border border-slate-400/20">🥈 الثاني: 30</span>
-                  <span className="flex items-center justify-center gap-1 py-1 bg-orange-500/10 text-orange-300 font-bold text-[10px] rounded border border-orange-500/20">🥉 الثالث: 20</span>
-                  <span className="col-span-2 flex items-center justify-center gap-1 py-1 bg-blue-500/10 text-blue-300 font-bold text-[10px] rounded border border-blue-500/20">🏅 الرابع: 10</span>
-                </div>
-              </div>
+              <span className="self-start bg-amber-500/20 text-amber-300 text-xs font-black px-2.5 py-1 rounded-lg border border-amber-500/30">20 درجة</span>
+              <p className="text-[11px] text-slate-400 leading-relaxed">تُعطى للمجموعة اللي حضر منها أكبر عدد.</p>
             </div>
+
+            {/* 2. التجمع */}
+            <div className="group bg-black/40 p-4 rounded-xl border border-white/10 hover:bg-black/60 transition-colors duration-300 flex flex-col gap-2.5 slide-up" style={{ animationDelay: "50ms" }}>
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-indigo-500/10 rounded-lg text-indigo-400 shrink-0"><Users className="w-4 h-4" /></div>
+                <h4 className="text-sm font-black text-white">التجمع (صلاة / محاضرات)</h4>
+              </div>
+              <div className="grid grid-cols-4 gap-1 text-center">
+                <span className="py-1 bg-amber-500/15 text-amber-300 font-black text-[10px] rounded border border-amber-500/20">🥇 20</span>
+                <span className="py-1 bg-slate-400/10 text-slate-300 font-bold text-[10px] rounded border border-slate-400/20">🥈 15</span>
+                <span className="py-1 bg-orange-500/10 text-orange-300 font-bold text-[10px] rounded border border-orange-500/20">🥉 10</span>
+                <span className="py-1 bg-blue-500/10 text-blue-300 font-bold text-[10px] rounded border border-blue-500/20">4️⃣ 0</span>
+              </div>
+              <p className="text-[11px] text-slate-400 leading-relaxed">ترتيب المجموعات الأربعة حسب الالتزام والانضباط.</p>
+            </div>
+
+            {/* 3. تفاعل */}
+            <div className="group bg-black/40 p-4 rounded-xl border border-white/10 hover:bg-black/60 transition-colors duration-300 flex flex-col gap-2.5 slide-up" style={{ animationDelay: "100ms" }}>
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-blue-500/10 rounded-lg text-blue-400 shrink-0"><BookOpen className="w-4 h-4" /></div>
+                <h4 className="text-sm font-black text-white">تفاعل (دراسة الكتاب / محاضرات)</h4>
+              </div>
+              <span className="self-start bg-blue-500/20 text-blue-300 text-xs font-black px-2.5 py-1 rounded-lg border border-blue-500/30">حتى 10 لكل مجموعة</span>
+              <p className="text-[11px] text-slate-400 leading-relaxed">الأسئلة توزع بالتساوي على كل المجموعات لتكافؤ الفرص.</p>
+            </div>
+
+            {/* 4. نظافة الغرف */}
+            <div className="group bg-black/40 p-4 rounded-xl border border-white/10 hover:bg-black/60 transition-colors duration-300 flex flex-col gap-2.5 slide-up" style={{ animationDelay: "150ms" }}>
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-cyan-500/10 rounded-lg text-cyan-400 shrink-0"><DoorOpen className="w-4 h-4" /></div>
+                <h4 className="text-sm font-black text-white">نظافة الغرف</h4>
+              </div>
+              <span className="self-start bg-cyan-500/20 text-cyan-300 text-xs font-black px-2.5 py-1 rounded-lg border border-cyan-500/30">حتى 10 لكل مجموعة</span>
+              <p className="text-[11px] text-slate-400 leading-relaxed">لو الغرفة فيها أفراد من مجموعات مختلفة، الدرجة تتضاف لكل واحد لمجموعته.</p>
+            </div>
+
+            {/* 5. حفظ اللحن */}
+            <div className="group bg-black/40 p-4 rounded-xl border border-white/10 hover:bg-black/60 transition-colors duration-300 flex flex-col gap-2.5 slide-up" style={{ animationDelay: "200ms" }}>
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-violet-500/10 rounded-lg text-violet-400 shrink-0"><Music className="w-4 h-4" /></div>
+                <h4 className="text-sm font-black text-white">حفظ اللحن (تسميع)</h4>
+              </div>
+              <div className="grid grid-cols-4 gap-1 text-center">
+                <span className="py-1 bg-amber-500/15 text-amber-300 font-black text-[10px] rounded border border-amber-500/20">🥇 20</span>
+                <span className="py-1 bg-slate-400/10 text-slate-300 font-bold text-[10px] rounded border border-slate-400/20">🥈 15</span>
+                <span className="py-1 bg-orange-500/10 text-orange-300 font-bold text-[10px] rounded border border-orange-500/20">🥉 10</span>
+                <span className="py-1 bg-blue-500/10 text-blue-300 font-bold text-[10px] rounded border border-blue-500/20">4️⃣ 5</span>
+              </div>
+              <p className="text-[11px] text-slate-400 leading-relaxed">تسميع للمجموعة كلها، وترتيب أربع مستويات.</p>
+            </div>
+
+            {/* 6. أفضل سلوك فردي */}
+            <div className="group bg-black/40 p-4 rounded-xl border border-white/10 hover:bg-black/60 transition-colors duration-300 flex flex-col gap-2.5 slide-up" style={{ animationDelay: "250ms" }}>
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-rose-500/10 rounded-lg text-rose-400 shrink-0"><Crown className="w-4 h-4" /></div>
+                <h4 className="text-sm font-black text-white">أفضل سلوك فردي</h4>
+              </div>
+              <div className="flex gap-1.5">
+                <span className="bg-rose-500/20 text-rose-300 text-xs font-black px-2.5 py-1 rounded-lg border border-rose-500/30">ولد: 20</span>
+                <span className="bg-pink-500/20 text-pink-300 text-xs font-black px-2.5 py-1 rounded-lg border border-pink-500/30">بنت: 20</span>
+              </div>
+              <p className="text-[11px] text-slate-400 leading-relaxed">أفضل أخلاق وروح رياضية، بالاتفاق بين كل الخدام. الدرجة تضاف لمجموعة الفائز/ة.</p>
+            </div>
+
+            {/* 7. الألعاب التنافسية */}
+            <div className="group bg-black/40 p-4 rounded-xl border border-white/10 hover:bg-black/60 transition-colors duration-300 flex flex-col gap-2.5 slide-up" style={{ animationDelay: "300ms" }}>
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-teal-500/10 rounded-lg text-teal-400 shrink-0"><Gamepad2 className="w-4 h-4" /></div>
+                <h4 className="text-sm font-black text-white">الألعاب التنافسية</h4>
+              </div>
+              <span className="self-start bg-teal-500/20 text-teal-300 text-xs font-black px-2.5 py-1 rounded-lg border border-teal-500/30">10 درجات / لعبة</span>
+              <p className="text-[11px] text-slate-400 leading-relaxed">للمجموعة الفائزة، ويمكن تكرارها لأكتر من لعبة لو الوقت متاح.</p>
+            </div>
+
+            {/* 8. الكنز */}
+            <div className="group bg-gradient-to-b from-amber-500/10 via-black/40 to-black/60 p-4 rounded-xl border border-amber-500/20 hover:border-amber-500/40 transition-colors duration-300 flex flex-col gap-2.5 slide-up" style={{ animationDelay: "350ms" }}>
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-amber-500/10 rounded-lg text-amber-400 shrink-0"><Map className="w-4 h-4" /></div>
+                <h4 className="text-sm font-black text-white">الكنز</h4>
+              </div>
+              <span className="self-start bg-amber-500/20 text-amber-300 text-xs font-black px-2.5 py-1 rounded-lg border border-amber-500/30">30 درجة</span>
+              <p className="text-[11px] text-slate-400 leading-relaxed">للمجموعة الفائزة بالكنز.</p>
+            </div>
+
+            {/* 9. سكيب روم */}
+            <div className="group bg-gradient-to-b from-emerald-500/10 via-black/40 to-black/60 p-4 rounded-xl border border-emerald-500/20 hover:border-emerald-500/40 transition-colors duration-300 flex flex-col gap-2.5 slide-up" style={{ animationDelay: "400ms" }}>
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-emerald-500/10 rounded-lg text-emerald-400 shrink-0"><Target className="w-4 h-4" /></div>
+                <h4 className="text-sm font-black text-white">سكيب روم</h4>
+              </div>
+              <span className="self-start bg-emerald-500/20 text-emerald-300 text-xs font-black px-2.5 py-1 rounded-lg border border-emerald-500/30">30 درجة</span>
+              <p className="text-[11px] text-slate-400 leading-relaxed">للمجموعة الفائزة.</p>
+            </div>
+
+            {/* 10. حفلة التنكر */}
+            <div className="group bg-black/40 p-4 rounded-xl border border-white/10 hover:bg-black/60 transition-colors duration-300 flex flex-col gap-2.5 slide-up" style={{ animationDelay: "450ms" }}>
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-fuchsia-500/10 rounded-lg text-fuchsia-400 shrink-0"><Smile className="w-4 h-4" /></div>
+                <h4 className="text-sm font-black text-white">حفلة التنكر</h4>
+              </div>
+              <div className="flex gap-1.5">
+                <span className="bg-fuchsia-500/20 text-fuchsia-300 text-xs font-black px-2.5 py-1 rounded-lg border border-fuchsia-500/30">ولد: 20</span>
+                <span className="bg-pink-500/20 text-pink-300 text-xs font-black px-2.5 py-1 rounded-lg border border-pink-500/30">بنت: 20</span>
+              </div>
+              <p className="text-[11px] text-slate-400 leading-relaxed">اختيار أفضل تنكر ولد وأفضل تنكر بنت، تضاف لمجموعة كل فائز/ة.</p>
+            </div>
+
+            {/* 11. خصم / جزاء */}
+            <div className="group bg-gradient-to-b from-rose-500/10 via-black/40 to-black/60 p-4 rounded-xl border border-rose-500/30 hover:border-rose-500/50 transition-colors duration-300 flex flex-col gap-2.5 slide-up" style={{ animationDelay: "500ms" }}>
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-rose-500/15 rounded-lg text-rose-400 shrink-0"><UserMinus className="w-4 h-4" /></div>
+                <h4 className="text-sm font-black text-white">خصم / جزاء</h4>
+              </div>
+              <span className="self-start bg-rose-500/20 text-rose-300 text-xs font-black px-2.5 py-1 rounded-lg border border-rose-500/30">➖ رقم سالب</span>
+              <p className="text-[11px] text-slate-400 leading-relaxed">لخصم درجات نتيجة مخالفة، متاح من نفس شاشة رصد النقاط.</p>
+            </div>
+
           </div>
 
-          {/* Secondary Events Category */}
-          <div className="space-y-3 pt-2">
-            <h3 className="text-sm font-black text-white/90 flex items-center gap-2 mb-2 px-1">
-              <div className="w-1 h-4 bg-indigo-500 rounded-full shadow-[0_0_10px_rgba(99,102,241,0.5)]"></div>
-              النقاط التفصيلية للفقرات
-            </h3>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-              {/* 5. دراسة الكتاب */}
-              <div className="group bg-black/40 p-4 rounded-xl border border-white/10 hover:bg-black/60 transition-colors duration-300 slide-up" style={staggeredDelay(5)}>
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2.5">
-                    <div className="p-2 bg-blue-500/10 rounded-lg text-blue-400 group-hover:scale-110 transition-transform">
-                      <BookOpen className="w-4 h-4" />
-                    </div>
-                    <h4 className="text-sm font-black text-white">دراسة الكتاب</h4>
-                  </div>
-                  <span className="bg-blue-500/20 text-blue-300 text-[10px] font-black px-2 py-0.5 rounded border border-blue-500/30">ماكس: 60</span>
-                </div>
-                <div className="space-y-1.5">
-                  <div className="flex justify-between items-center bg-white/5 px-3 py-1.5 rounded text-[11px]">
-                    <span className="text-slate-300 font-bold">الحضور</span>
-                    <span className="text-white font-mono font-bold">10</span>
-                  </div>
-                  <div className="flex justify-between items-center bg-white/5 px-3 py-1.5 rounded text-[11px]">
-                    <span className="text-slate-300 font-bold">التفاعل والأسئلة</span>
-                    <span className="text-white font-mono font-bold">50</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* 6. ورش العمل */}
-              <div className="group bg-black/40 p-4 rounded-xl border border-white/10 hover:bg-black/60 transition-colors duration-300 slide-up" style={staggeredDelay(6)}>
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2.5">
-                    <div className="p-2 bg-cyan-500/10 rounded-lg text-cyan-400 group-hover:scale-110 transition-transform">
-                      <Wrench className="w-4 h-4" />
-                    </div>
-                    <h4 className="text-sm font-black text-white">ورش العمل</h4>
-                  </div>
-                  <span className="bg-cyan-500/20 text-cyan-300 text-[10px] font-black px-2 py-0.5 rounded border border-cyan-500/30">ماكس: 60</span>
-                </div>
-                <div className="space-y-1.5">
-                  <div className="flex justify-between items-center bg-white/5 px-3 py-1.5 rounded text-[11px]">
-                    <span className="text-slate-300 font-bold">الحضور</span>
-                    <span className="text-white font-mono font-bold">10</span>
-                  </div>
-                  <div className="flex justify-between items-center bg-white/5 px-3 py-1.5 rounded text-[11px]">
-                    <span className="text-slate-300 font-bold">التفاعل</span>
-                    <span className="text-white font-mono font-bold">20</span>
-                  </div>
-                  <div className="flex justify-between items-center bg-white/5 px-3 py-1.5 rounded text-[11px]">
-                    <span className="text-slate-300 font-bold">حل اللغز</span>
-                    <span className="text-white font-mono font-bold">30</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* 7. المحاضرات */}
-              <div className="group bg-black/40 p-4 rounded-xl border border-white/10 hover:bg-black/60 transition-colors duration-300 slide-up" style={staggeredDelay(7)}>
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2.5">
-                    <div className="p-2 bg-indigo-500/10 rounded-lg text-indigo-400 group-hover:scale-110 transition-transform">
-                      <Mic className="w-4 h-4" />
-                    </div>
-                    <h4 className="text-sm font-black text-white">المحاضرات</h4>
-                  </div>
-                  <span className="bg-indigo-500/20 text-indigo-300 text-[10px] font-black px-2 py-0.5 rounded border border-indigo-500/30">ماكس: 30</span>
-                </div>
-                <div className="space-y-1.5">
-                  <div className="flex justify-between items-center bg-white/5 px-3 py-1.5 rounded text-[11px]">
-                    <span className="text-slate-300 font-bold">الحضور</span>
-                    <span className="text-white font-mono font-bold">10</span>
-                  </div>
-                  <div className="flex justify-between items-center bg-white/5 px-3 py-1.5 rounded text-[11px]">
-                    <span className="text-slate-300 font-bold">التفاعل</span>
-                    <span className="text-white font-mono font-bold">20</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* 8. بونص التجمع السريع */}
-              <div className="group bg-gradient-to-b from-amber-500/10 via-black/40 to-black/60 p-4 rounded-xl border border-amber-500/20 hover:border-amber-500/40 transition-colors duration-300 slide-up" style={staggeredDelay(8)}>
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2.5">
-                    <div className="p-2 bg-amber-500/10 rounded-lg text-amber-400 group-hover:scale-110 transition-transform">
-                      <Zap className="w-4 h-4" />
-                    </div>
-                    <h4 className="text-sm font-black text-white">الحضور المبكر</h4>
-                  </div>
-                </div>
-                <div className="space-y-1.5">
-                  <div className="flex justify-between items-center bg-white/5 px-3 py-1.5 rounded text-[11px]">
-                    <span className="text-amber-300 font-bold">المركز الأول</span>
-                    <span className="text-white font-mono font-bold bg-amber-500/20 px-1.5 rounded border border-amber-500/30">+10</span>
-                  </div>
-                  <div className="flex justify-between items-center bg-white/5 px-3 py-1.5 rounded text-[11px]">
-                    <span className="text-slate-300 font-bold">المركز الثاني</span>
-                    <span className="text-white font-mono font-bold bg-slate-500/20 px-1.5 rounded border border-slate-500/30">+7</span>
-                  </div>
-                  <div className="flex justify-between items-center bg-white/5 px-3 py-1.5 rounded text-[11px]">
-                    <span className="text-orange-300 font-bold">المركز الثالث</span>
-                    <span className="text-white font-mono font-bold bg-orange-500/20 px-1.5 rounded border border-orange-500/30">+5</span>
-                  </div>
-                  <div className="flex justify-between items-center bg-white/5 px-3 py-1.5 rounded text-[11px]">
-                    <span className="text-blue-300 font-bold">المركز الرابع</span>
-                    <span className="text-white font-mono font-bold bg-blue-500/20 px-1.5 rounded border border-blue-500/30">+3</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          
         </div>
 
         {/* Modal Footer with Direct Add Points Action */}

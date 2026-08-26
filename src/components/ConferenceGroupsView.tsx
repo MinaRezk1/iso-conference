@@ -77,6 +77,7 @@ export default function ConferenceGroupsView({ groups, isAdmin, onRefreshData }:
   // Handle Add Member
   const handleSaveNewMember = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isAdmin) return;
     if (!addMemberName.trim()) return;
 
     setActionLoading(true);
@@ -113,6 +114,7 @@ export default function ConferenceGroupsView({ groups, isAdmin, onRefreshData }:
   };
 
   const handleConfirmMoveMember = async () => {
+    if (!isAdmin) return;
     if (!moveMemberData || !targetGroupId) return;
     if (moveMemberData.sourceGroup.id === targetGroupId) {
       alert("العضو موجود بالفعل في هذه المجموعة!");
@@ -160,6 +162,7 @@ export default function ConferenceGroupsView({ groups, isAdmin, onRefreshData }:
 
   const handleSaveEditMember = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isAdmin) return;
     if (!editMemberData || !editMemberName.trim()) return;
 
     setActionLoading(true);
@@ -187,6 +190,7 @@ export default function ConferenceGroupsView({ groups, isAdmin, onRefreshData }:
 
   // Handle Delete Member
   const handleDeleteMember = async (group: ConferenceGroup, member: ConferenceMember) => {
+    if (!isAdmin) return;
     if (!window.confirm(`هل أنت أؤكد حذف "${member.name}" من ${group.name}؟`)) return;
 
     setActionLoading(true);
@@ -206,6 +210,7 @@ export default function ConferenceGroupsView({ groups, isAdmin, onRefreshData }:
 
   // Reset to original PDF list
   const handleResetToDefault = async () => {
+    if (!isAdmin) return;
     setActionLoading(true);
     try {
       const batch = writeBatch(db);
@@ -247,17 +252,19 @@ export default function ConferenceGroupsView({ groups, isAdmin, onRefreshData }:
           </div>
 
           <div className="flex items-center gap-3 shrink-0">
-            <button
-              onClick={() => {
-                setAddMemberGroupId(groups[0]?.id || "g1");
-                setAddMemberName("");
-                setShowAddMember(true);
-              }}
-              className="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 flex items-center gap-2 cursor-pointer transition-all active:scale-95"
-            >
-              <UserPlus className="w-4 h-4" />
-              <span>إضافة ولد جديد</span>
-            </button>
+            {isAdmin && (
+              <button
+                onClick={() => {
+                  setAddMemberGroupId(groups[0]?.id || "g1");
+                  setAddMemberName("");
+                  setShowAddMember(true);
+                }}
+                className="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 flex items-center gap-2 cursor-pointer transition-all active:scale-95"
+              >
+                <UserPlus className="w-4 h-4" />
+                <span>إضافة ولد جديد</span>
+              </button>
+            )}
 
             {isAdmin && (
               <button
@@ -376,6 +383,7 @@ export default function ConferenceGroupsView({ groups, isAdmin, onRefreshData }:
                     </div>
                   </div>
 
+                  {isAdmin && (
                   <button
                     onClick={() => {
                       setAddMemberGroupId(group.id);
@@ -388,6 +396,7 @@ export default function ConferenceGroupsView({ groups, isAdmin, onRefreshData }:
                     <UserPlus className="w-3.5 h-3.5" />
                     <span className="hidden sm:inline">إضافة عضو</span>
                   </button>
+                  )}
                 </div>
 
                 {/* Members List */}
@@ -419,6 +428,7 @@ export default function ConferenceGroupsView({ groups, isAdmin, onRefreshData }:
                           </div>
 
                           {/* Member Actions */}
+                          {isAdmin && (
                           <div className="flex items-center gap-1.5 shrink-0">
                             {/* Transfer Button */}
                             <button
@@ -448,6 +458,7 @@ export default function ConferenceGroupsView({ groups, isAdmin, onRefreshData }:
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
                           </div>
+                          )}
                         </div>
                       );
                     })
