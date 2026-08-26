@@ -23,9 +23,9 @@ import {
   Trophy
 } from "lucide-react";
 import { Lesson, ConferenceGroup } from "../types";
-import { db, auth, ADMIN_EMAIL } from "../lib/firebase";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { collection, addDoc, deleteDoc, doc, updateDoc, setDoc } from "firebase/firestore";
+import { db } from "../lib/firebase";
+import { collection, query, where, getDocs, addDoc, deleteDoc, doc, updateDoc, setDoc } from "firebase/firestore";
+import { hashPassword } from "../lib/authUtils";
 import { Book3D } from "./ThreeDIcons";
 import QuizView from "./QuizView";
 
@@ -47,6 +47,7 @@ export default function LessonsView({ lessons, isAdmin, setIsAdmin, onRefreshDat
   const [subTab, setSubTab] = useState<"public" | "staff" | "quiz">("public");
 
   // Inline Auth Form States
+  const [inlineUsername, setInlineUsername] = useState("");
   const [inlinePassword, setInlinePassword] = useState("");
   const [inlineError, setInlineError] = useState("");
   const [inlineLoggingIn, setInlineLoggingIn] = useState(false);
@@ -171,21 +172,39 @@ export default function LessonsView({ lessons, isAdmin, setIsAdmin, onRefreshDat
   const handleInlineLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!setIsAdmin) return;
+    const u = inlineUsername.trim();
     const p = inlinePassword.trim();
 
-    if (!p) {
-      setInlineError("من فضلك ادخل كلمة المرور.");
+    if (!u || !p) {
+      setInlineError("من فضلك ادخل اسم المستخدم وكلمة المرور.");
       return;
     }
 
     setInlineLoggingIn(true);
     setInlineError("");
     try {
-      await signInWithEmailAndPassword(auth, ADMIN_EMAIL, p);
-      setIsAdmin(true);
-      setInlinePassword("");
+      const hash = await hashPassword(p);
+      const q = query(
+        collection(db, "adminUsers"),
+        where("username", "==", u),
+        where("passwordHash", "==", hash)
+      );
+      const snap = await getDocs(q);
+      if (!snap.empty) {
+        setIsAdmin(true);
+        try {
+          localStorage.setItem("reflect_admin_username", u);
+        } catch (e) {
+          // ignore
+        }
+        setInlineUsername("");
+        setInlinePassword("");
+      } else {
+        setInlineError("اسم المستخدم أو كلمة المرور غير صحيحة! حاول مجدداً.");
+      }
     } catch (err) {
-      setInlineError("كلمة المرور غير صحيحة! حاول مجدداً.");
+      console.error(err);
+      setInlineError("حدث خطأ أثناء تسجيل الدخول، حاول مجدداً.");
     } finally {
       setInlineLoggingIn(false);
     }
@@ -292,6 +311,20 @@ export default function LessonsView({ lessons, isAdmin, setIsAdmin, onRefreshDat
             <form onSubmit={handleInlineLoginSubmit} className="space-y-3.5 max-w-xs mx-auto">
               <div>
                 <input
+                  type="text"
+                  value={inlineUsername}
+                  onChange={(e) => {
+                    setInlineUsername(e.target.value);
+                    setInlineError("");
+                  }}
+                  placeholder="اسم المستخدم"
+                  autoFocus
+                  className="w-full px-4 py-3 rounded-xl border border-slate-700/80 bg-slate-950/80 text-white text-center text-xs font-bold focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all placeholder-slate-500"
+                />
+              </div>
+
+              <div>
+                <input
                   type="password"
                   value={inlinePassword}
                   onChange={(e) => {
@@ -299,7 +332,6 @@ export default function LessonsView({ lessons, isAdmin, setIsAdmin, onRefreshDat
                     setInlineError("");
                   }}
                   placeholder="كلمة المرور"
-                  autoFocus
                   className="w-full px-4 py-3 rounded-xl border border-slate-700/80 bg-slate-950/80 text-white text-center font-mono font-bold text-xs tracking-wider focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all placeholder-slate-500"
                 />
               </div>

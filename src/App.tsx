@@ -20,15 +20,15 @@ import {
   Sun,
   BedDouble
 } from "lucide-react";
-import { db, auth } from "./lib/firebase";
+import { db } from "./lib/firebase";
 import { collection, onSnapshot, query, orderBy, doc, getDoc, updateDoc, deleteDoc, getDocs, writeBatch } from "firebase/firestore";
-import { onAuthStateChanged, signOut } from "firebase/auth";
 import IntroScreen from "./components/IntroScreen";
 import PrayersView from "./components/PrayersView";
 import { 
   seedDatabaseIfEmpty, 
   resetAllTeamScoresToZero, 
   seedConferenceGroupsIfEmpty,
+  seedAdminUsersIfEmpty,
   importDatabaseJSON,
   syncIsoScheduleAndLessons,
   DEFAULT_TEAMS, 
@@ -75,25 +75,6 @@ export default function App() {
     }
   });
 
-  useEffect(() => {
-    // Source of truth for admin/write access is now the actual Firebase Auth
-    // session (checked server-side by firestore.rules), not this local flag.
-    // This keeps the UI in sync if the session expires or signs in elsewhere.
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setIsAdminState(!!user);
-      try {
-        if (user) {
-          localStorage.setItem("reflect_is_admin", "true");
-        } else {
-          localStorage.removeItem("reflect_is_admin");
-        }
-      } catch (e) {
-        console.error(e);
-      }
-    });
-    return () => unsubscribe();
-  }, []);
-
   const setIsAdmin = (val: boolean) => {
     setIsAdminState(val);
     try {
@@ -101,7 +82,6 @@ export default function App() {
         localStorage.setItem("reflect_is_admin", "true");
       } else {
         localStorage.removeItem("reflect_is_admin");
-        signOut(auth).catch(() => {});
       }
     } catch (e) {
       console.error(e);
@@ -332,6 +312,7 @@ export default function App() {
       try {
         await seedDatabaseIfEmpty();
         await seedConferenceGroupsIfEmpty();
+        await seedAdminUsersIfEmpty();
         await syncIsoScheduleAndLessons();
 
         // Automatic ISO songs and lessons synchronization is handled in syncIsoScheduleAndLessons()
@@ -559,7 +540,6 @@ export default function App() {
                   </span>
                   <button
                     onClick={() => {
-                      signOut(auth).catch((err) => console.error("Sign out error", err));
                       setIsAdmin(false);
                       setIsMobileMenuOpen(false);
                     }}

@@ -157,6 +157,13 @@ export interface Prayer {
   sections: PrayerSection[];
 }
 
+export interface AdminUser {
+  id: string;
+  username: string;
+  passwordHash: string;
+  createdAt?: any;
+}
+
 export interface QuizQuestion {
   id: string;
   section: string; // e.g. "أولاً: اختر الإجابة الصحيحة"

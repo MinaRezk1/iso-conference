@@ -778,6 +778,26 @@ export async function syncRoomsWithLatest() {
   }
 }
 
+// Initial primary admin account (username: MinaRezk).
+// The password itself is never stored anywhere — only its SHA-256 hash.
+export async function seedAdminUsersIfEmpty() {
+  try {
+    const adminsRef = collection(db, "adminUsers");
+    const snapshot = await getDocs(adminsRef);
+    if (snapshot.empty) {
+      console.log("Admin users collection is empty. Seeding primary admin...");
+      await setDoc(doc(db, "adminUsers", "admin_primary"), {
+        username: "MinaRezk",
+        passwordHash: "2ececbe3995a053dd783c0a6aef4c784a1d534eb7a2561142ddb1a6b2dac2fe6",
+        createdAt: new Date().toISOString()
+      });
+      console.log("Primary admin seeded successfully!");
+    }
+  } catch (e) {
+    console.error("Error seeding admin users:", e);
+  }
+}
+
 export async function importDatabaseJSON(data: any) {
   if (!data || typeof data !== "object") {
     throw new Error("تنسيق الملف غير صالح!");

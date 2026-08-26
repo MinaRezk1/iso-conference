@@ -1,9 +1,11 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { Lock, ShieldAlert, RefreshCw, KeyRound, Download, Upload, X, ShieldCheck, Eye, EyeOff } from "lucide-react";
-import { signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { Lock, ShieldAlert, RefreshCw, KeyRound, Download, Upload, X, ShieldCheck, Eye, EyeOff, Users, UserPlus, Trash2, ChevronRight } from "lucide-react";
+import { collection, query, where, getDocs, addDoc, deleteDoc, doc, onSnapshot } from "firebase/firestore";
 import { seedDatabaseIfEmpty, importDatabaseJSON } from "../lib/seedData";
-import { auth, ADMIN_EMAIL } from "../lib/firebase";
+import { db } from "../lib/firebase";
+import { hashPassword } from "../lib/authUtils";
+import { AdminUser } from "../types";
 
 interface AdminControlsProps {
   isAdmin: boolean;
@@ -24,12 +26,21 @@ export default function AdminControls({
   forceOpenModal,
   onModalClose
 }: AdminControlsProps) {
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [internalShowModal, setInternalShowModal] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
+
+  // Manage admin accounts (add / delete)
+  const [showManageAdmins, setShowManageAdmins] = useState(false);
+  const [adminUsersList, setAdminUsersList] = useState<AdminUser[]>([]);
+  const [newAdminUsername, setNewAdminUsername] = useState("");
+  const [newAdminPassword, setNewAdminPassword] = useState("");
+  const [isAddingAdmin, setIsAddingAdmin] = useState(false);
+  const [manageError, setManageError] = useState("");
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -39,44 +50,129 @@ export default function AdminControls({
     setInternalShowModal(false);
     if (onModalClose) onModalClose();
     setError("");
+    setUsername("");
     setPassword("");
+    setShowManageAdmins(false);
   };
 
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    const sanitizedUsername = username.trim();
     const sanitizedPassword = password.trim();
 
-    if (!sanitizedPassword) {
-      setError("من فضلك ادخل كلمة المرور.");
+    if (!sanitizedUsername || !sanitizedPassword) {
+      setError("من فضلك ادخل اسم المستخدم وكلمة المرور.");
       return;
     }
 
     setIsLoggingIn(true);
     setError("");
     try {
-      // Real server-side authentication via Firebase Auth.
-      // The admin account + its password are managed in the Firebase Console,
-      // not stored anywhere in this code.
-      await signInWithEmailAndPassword(auth, ADMIN_EMAIL, sanitizedPassword);
-      setIsAdmin(true);
-      closeModal();
-      setPassword("");
+      const hash = await hashPassword(sanitizedPassword);
+      const q = query(
+        collection(db, "adminUsers"),
+        where("username", "==", sanitizedUsername),
+        where("passwordHash", "==", hash)
+      );
+      const snap = await getDocs(q);
+      if (!snap.empty) {
+        setIsAdmin(true);
+        try {
+          localStorage.setItem("reflect_admin_username", sanitizedUsername);
+        } catch (e) {
+          // ignore
+        }
+        closeModal();
+      } else {
+        setError("اسم المستخدم أو كلمة المرور غير صحيحة! حاول مجدداً.");
+      }
     } catch (err) {
-      setError("كلمة المرور غير صحيحة! حاول مجدداً.");
+      console.error(err);
+      setError("حدث خطأ أثناء تسجيل الدخول، حاول مجدداً.");
     } finally {
       setIsLoggingIn(false);
     }
   };
 
-  const handleLogout = async () => {
+  const handleLogout = () => {
+    setIsAdmin(false);
     try {
-      await signOut(auth);
+      localStorage.removeItem("reflect_admin_username");
+    } catch (e) {
+      // ignore
+    }
+  };
+
+  // Fetch admin users list only while the manage-admins panel is open
+  useEffect(() => {
+    if (!showManageAdmins || !isAdmin) return;
+    const unsub = onSnapshot(
+      collection(db, "adminUsers"),
+      (snap) => {
+        const list: AdminUser[] = [];
+        snap.forEach((d) => list.push({ id: d.id, ...d.data() } as AdminUser));
+        list.sort((a, b) => a.username.localeCompare(b.username));
+        setAdminUsersList(list);
+      },
+      (err) => console.error("adminUsers snapshot error", err)
+    );
+    return () => unsub();
+  }, [showManageAdmins, isAdmin]);
+
+  const handleAddAdmin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isAdmin) return;
+    const uname = newAdminUsername.trim();
+    const pwd = newAdminPassword.trim();
+    setManageError("");
+
+    if (!uname || !pwd) {
+      setManageError("من فضلك ادخل اسم مستخدم وكلمة مرور.");
+      return;
+    }
+    if (pwd.length < 4) {
+      setManageError("كلمة المرور قصيرة جداً (٤ حروف على الأقل).");
+      return;
+    }
+
+    setIsAddingAdmin(true);
+    try {
+      const existing = await getDocs(query(collection(db, "adminUsers"), where("username", "==", uname)));
+      if (!existing.empty) {
+        setManageError("اسم المستخدم ده مستخدم بالفعل.");
+        setIsAddingAdmin(false);
+        return;
+      }
+      const hash = await hashPassword(pwd);
+      await addDoc(collection(db, "adminUsers"), {
+        username: uname,
+        passwordHash: hash,
+        createdAt: new Date().toISOString()
+      });
+      setNewAdminUsername("");
+      setNewAdminPassword("");
     } catch (err) {
-      console.error("Sign out error", err);
+      console.error(err);
+      setManageError("حدث خطأ أثناء إضافة الحساب.");
     } finally {
-      setIsAdmin(false);
+      setIsAddingAdmin(false);
+    }
+  };
+
+  const handleDeleteAdmin = async (adminUser: AdminUser) => {
+    if (!isAdmin) return;
+    if (adminUsersList.length <= 1) {
+      alert("لازم يفضل حساب أدمن واحد على الأقل، مينفعش تمسح آخر حساب.");
+      return;
+    }
+    if (!window.confirm(`هل أنت متأكد من حذف حساب "${adminUser.username}"؟`)) return;
+    try {
+      await deleteDoc(doc(db, "adminUsers", adminUser.id));
+    } catch (err) {
+      console.error(err);
+      alert("حدث خطأ أثناء حذف الحساب.");
     }
   };
 
@@ -229,6 +325,90 @@ export default function AdminControls({
 
             {isAdmin ? (
               /* Already Logged In Servant Management View */
+              showManageAdmins ? (
+                /* Manage Admin Accounts Sub-View */
+                <div className="space-y-4 pt-1">
+                  <button
+                    onClick={() => setShowManageAdmins(false)}
+                    className="flex items-center gap-1.5 text-xs font-bold text-indigo-300 hover:text-white bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 px-3 py-1.5 rounded-xl transition-all cursor-pointer"
+                  >
+                    <ChevronRight className="w-3.5 h-3.5" />
+                    <span>رجوع</span>
+                  </button>
+
+                  <div className="flex flex-col items-center text-center">
+                    <div className="w-12 h-12 rounded-2xl bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center text-indigo-300 mb-2 shadow-lg">
+                      <Users className="w-6 h-6 text-indigo-400" />
+                    </div>
+                    <h3 className="text-lg font-serif font-black text-white">إدارة حسابات الأدمن</h3>
+                    <p className="text-xs text-slate-300 mt-1">أضف أو احذف حسابات دخول للخدام</p>
+                  </div>
+
+                  {/* Existing accounts list */}
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {adminUsersList.length === 0 ? (
+                      <p className="text-xs text-slate-400 text-center py-3">جارٍ التحميل...</p>
+                    ) : (
+                      adminUsersList.map((u) => (
+                        <div
+                          key={u.id}
+                          className="flex items-center justify-between bg-slate-950/60 border border-slate-800 rounded-xl px-3.5 py-2.5"
+                        >
+                          <span className="text-xs font-bold text-white">{u.username}</span>
+                          <button
+                            onClick={() => handleDeleteAdmin(u)}
+                            className="p-1.5 rounded-lg hover:bg-rose-500/20 text-slate-500 hover:text-rose-400 transition-colors cursor-pointer"
+                            title="حذف الحساب"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ))
+                    )}
+                  </div>
+
+                  {/* Add new account form */}
+                  <form onSubmit={handleAddAdmin} className="space-y-2.5 pt-3 border-t border-white/10">
+                    <p className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                      <UserPlus className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>إضافة حساب جديد</span>
+                    </p>
+                    <input
+                      type="text"
+                      value={newAdminUsername}
+                      onChange={(e) => {
+                        setNewAdminUsername(e.target.value);
+                        setManageError("");
+                      }}
+                      placeholder="اسم المستخدم الجديد"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-700/80 bg-slate-950/80 text-white text-right text-xs font-bold outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all placeholder-slate-500"
+                    />
+                    <input
+                      type="text"
+                      value={newAdminPassword}
+                      onChange={(e) => {
+                        setNewAdminPassword(e.target.value);
+                        setManageError("");
+                      }}
+                      placeholder="كلمة المرور اللي هتحطها له"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-700/80 bg-slate-950/80 text-white text-right font-mono text-xs font-bold outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all placeholder-slate-500"
+                    />
+                    {manageError && (
+                      <p className="text-xs text-rose-300 text-center font-bold bg-rose-500/15 border border-rose-500/30 py-2 rounded-xl">
+                        {manageError}
+                      </p>
+                    )}
+                    <button
+                      type="submit"
+                      disabled={isAddingAdmin}
+                      className="w-full py-2.5 text-xs font-bold text-white bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 disabled:opacity-60 rounded-xl transition-all cursor-pointer shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-1.5"
+                    >
+                      <UserPlus className="w-3.5 h-3.5" />
+                      <span>{isAddingAdmin ? "جارٍ الإضافة..." : "إضافة الحساب"}</span>
+                    </button>
+                  </form>
+                </div>
+              ) : (
               <div className="space-y-4 pt-1">
                 <div className="flex flex-col items-center text-center">
                   <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-300 mb-2 shadow-lg">
@@ -242,6 +422,22 @@ export default function AdminControls({
                 </div>
 
                 <div className="space-y-2.5 pt-2">
+                  <button
+                    onClick={() => setShowManageAdmins(true)}
+                    className="w-full flex items-center justify-between p-3.5 bg-gradient-to-r from-indigo-950/80 to-slate-900 border border-indigo-500/30 rounded-2xl hover:border-indigo-400 transition-all text-right cursor-pointer active:scale-98 shadow-md"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-xl bg-indigo-500/20 text-indigo-300 flex items-center justify-center shrink-0">
+                        <Users className="w-4 h-4 stroke-[2.5]" />
+                      </div>
+                      <div>
+                        <div className="text-xs font-black text-indigo-200">إدارة حسابات الأدمن</div>
+                        <div className="text-[10px] text-slate-400 font-medium">إضافة أو حذف حسابات دخول للخدام</div>
+                      </div>
+                    </div>
+                    <span className="text-xs text-indigo-400 font-bold">👥</span>
+                  </button>
+
                   {onExportData && (
                     <button
                       onClick={() => {
@@ -311,6 +507,7 @@ export default function AdminControls({
                   </button>
                 </div>
               </div>
+              )
             ) : (
               /* Servant Login View */
               <>
@@ -332,6 +529,24 @@ export default function AdminControls({
                 <form onSubmit={handleLogin} className="mt-5 space-y-3.5">
                   <div>
                     <label className="block text-xs font-bold text-slate-200 mb-1 flex items-center gap-1.5">
+                      <Users className="w-3.5 h-3.5 text-indigo-400" />
+                      <span>اسم المستخدم</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={username}
+                      onChange={(e) => {
+                        setUsername(e.target.value);
+                        setError("");
+                      }}
+                      placeholder="اسم المستخدم"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-700/80 bg-slate-950/80 text-white text-right text-xs sm:text-sm font-bold outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all placeholder-slate-500"
+                      autoFocus
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-200 mb-1 flex items-center gap-1.5">
                       <Lock className="w-3.5 h-3.5 text-indigo-400" />
                       <span>كلمة المرور</span>
                     </label>
@@ -345,7 +560,6 @@ export default function AdminControls({
                         }}
                         placeholder="كلمة المرور"
                         className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-700/80 bg-slate-950/80 text-white text-right font-mono font-bold text-xs sm:text-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all placeholder-slate-500"
-                        autoFocus
                       />
                       <button
                         type="button"

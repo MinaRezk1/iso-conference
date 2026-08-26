@@ -1,21 +1,17 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Quiz submissions: any attendee can submit (create) their own answers
-    // without logging in, but only the signed-in admin can read the list,
-    // edit a grade, or delete a submission — so participants can't see
-    // each other's names, answers, or scores.
-    match /quizSubmissions/{submissionId} {
-      allow create: if true;
-      allow read, update, delete: if request.auth != null;
-    }
-
-    // Everything else (schedule, hymns, lessons, quiz questions, scores,
-    // rooms, etc): anyone attending can read. Only a signed-in admin
-    // (Firebase Authentication) can create, edit, or delete data.
+    // NOTE: Firebase Authentication (Email/Password) is blocked on this
+    // project by the AI Studio "Starter tier" restriction, so admin login
+    // is handled by the app itself via the "adminUsers" collection (see
+    // src/lib/authUtils.ts) instead of real server-side auth. That means
+    // these rules can no longer check request.auth — protection here
+    // relies on the app's UI hiding admin controls from regular visitors,
+    // not on the database rejecting unauthorized writes. Everything is
+    // effectively open at the database level, same as any public app
+    // without a real backend. Do not put sensitive data in this project.
     match /{document=**} {
-      allow read: if true;
-      allow write: if request.auth != null;
+      allow read, write: if true;
     }
   }
 }

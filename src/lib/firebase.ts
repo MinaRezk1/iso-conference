@@ -6,7 +6,6 @@ import {
   persistentLocalCache, 
   persistentMultipleTabManager 
 } from "firebase/firestore";
-import { getAuth } from "firebase/auth";
 import firebaseConfig from "../../firebase-applet-config.json";
 
 // Silence non-fatal SDK network connection logs in container environments
@@ -42,13 +41,7 @@ try {
   }
 }
 
-const auth = getAuth(app);
+export { db };
 
-export { db, auth };
-
-// Fixed admin account used for the AdminControls login screen.
-// Create this exact user in: Firebase Console -> Authentication -> Sign-in method -> Email/Password
-// then set a strong password for it there (do NOT put the real password in this codebase).
-export const ADMIN_EMAIL = "admin@iso-conference.app";
 
 
