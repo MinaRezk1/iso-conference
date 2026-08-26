@@ -17,7 +17,8 @@ import {
   Upload,
   RefreshCw,
   ShieldAlert,
-  Sun
+  Sun,
+  BedDouble
 } from "lucide-react";
 import { db, auth } from "./lib/firebase";
 import { collection, onSnapshot, query, orderBy, doc, getDoc, updateDoc, deleteDoc, getDocs, writeBatch } from "firebase/firestore";
@@ -53,7 +54,6 @@ import AlhanView from "./components/AlhanView";
 import LessonsView from "./components/LessonsView";
 import ScoreboardView from "./components/ScoreboardView";
 import RoomsView from "./components/RoomsView";
-import FootballLeagueView from "./components/FootballLeagueView";
 import ConferenceGroupsView from "./components/ConferenceGroupsView";
 import InstallPrompt from "./components/InstallPrompt";
 import NotificationManager from "./components/NotificationManager";
@@ -442,6 +442,8 @@ export default function App() {
     { id: "songs", label: "ترانيم مؤتمر ISO", shortLabel: "الترانيم", icon: Music3D },
     { id: "lessons", label: "الشروحات والدراسات", shortLabel: "الدراسات", icon: Book3D },
     { id: "groups", label: "مجموعات المؤتمر", shortLabel: "الجروبات", icon: Users },
+    { id: "rooms", label: "غرف الإقامة", shortLabel: "الغرف", icon: BedDouble },
+    { id: "scoreboard", label: "السكور بورد", shortLabel: "السكور", icon: Trophy },
   ];
 
   if (showIntro) {
@@ -739,6 +741,21 @@ export default function App() {
             {activeTab === "groups" && (
               <ConferenceGroupsView 
                 groups={conferenceGroups} 
+                isAdmin={isAdmin} 
+                onRefreshData={handleRefreshData} 
+              />
+            )}
+            {activeTab === "rooms" && (
+              <RoomsView 
+                rooms={rooms} 
+                isAdmin={isAdmin} 
+                onRefreshData={handleRefreshData} 
+              />
+            )}
+            {activeTab === "scoreboard" && (
+              <ScoreboardView 
+                teams={teams} 
+                scoreLogs={scoreLogs}
                 isAdmin={isAdmin} 
                 onRefreshData={handleRefreshData} 
               />

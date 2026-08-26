@@ -43,6 +43,12 @@ export default function HomeView({
   // Current Live Event Detection
   const [activeLiveEvent, setActiveLiveEvent] = useState<EventSchedule | null>(null);
 
+  const sortedTeams = useMemo(() => {
+    return [...teams].sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0));
+  }, [teams]);
+
+  const RANK_MEDALS = ["🥇", "🥈", "🥉", "🏅"];
+
   useEffect(() => {
     const updateActiveEvent = () => {
       const live = schedule.find(ev => ev.status === "live");
@@ -297,6 +303,47 @@ export default function HomeView({
                 <li className="text-white font-medium">ورش العمل والأنشطة التفاعلية الجماعية</li>
                 <li className="text-emerald-300 font-bold">متابعة مسابقات ونقاط المجموعات</li>
               </ul>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Card 5: Team Standings (ترتيب الفرق) - Live data, not static */}
+        <motion.div 
+          whileHover={{ y: -4 }}
+          onClick={() => setActiveTab('scoreboard')}
+          className="glass-card p-6 cursor-pointer group flex flex-col justify-between relative overflow-hidden border border-amber-500/30 hover:border-amber-400/60 transition-all duration-300 rounded-3xl h-full bg-slate-900/70"
+        >
+          <div className="flex justify-between items-center relative z-10 mb-4">
+            <div className="flex items-center gap-3">
+              <div className="bg-amber-500/20 rounded-2xl p-3 text-amber-300 border border-amber-500/30 shrink-0">
+                <Trophy3D className="w-8 h-8" />
+              </div>
+              <div>
+                <h3 className="text-base sm:text-lg font-bold text-white group-hover:text-amber-300 transition-colors">
+                  ترتيب الفرق 🏆
+                </h3>
+                <span className="text-[11px] text-amber-300/80 font-medium">السكور بورد بالمؤتمر</span>
+              </div>
+            </div>
+            <ChevronLeft className="w-5 h-5 text-slate-400 group-hover:-translate-x-1 group-hover:text-amber-300 transition-all shrink-0" />
+          </div>
+
+          <div className="relative z-10 flex-1 flex flex-col justify-end">
+            <div className="pt-2 border-t border-white/10 bg-amber-950/20 p-3.5 rounded-2xl space-y-1.5 h-[155px] flex flex-col justify-center">
+              {sortedTeams.length === 0 ? (
+                <p className="text-xs text-slate-400 text-center">لسه مفيش نقاط مسجلة</p>
+              ) : (
+                sortedTeams.slice(0, 4).map((team, index) => (
+                  <div key={team.id} className="flex items-center justify-between bg-white/5 rounded-xl px-3 py-1.5">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="text-sm shrink-0">{RANK_MEDALS[index] || "🔹"}</span>
+                      <span className="text-lg shrink-0">{team.logo || "🔴"}</span>
+                      <span className="text-xs font-bold text-white truncate">{team.name}</span>
+                    </div>
+                    <span className="text-xs font-mono font-black text-amber-300 shrink-0">{team.totalScore || 0}</span>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </motion.div>
