@@ -63,7 +63,7 @@ export default function ScoreboardView({ teams, scoreLogs, isAdmin, onRefreshDat
     if (!isAdmin) return;
     if (
       !window.confirm(
-        "هيتم إضافة النقط اللي ضاعت بسبب الباج القديم (محسوبة من سجل النشاط): مدرسة عاشور +15، ايس كريم +10، بطاطس محمرة +20، ازاي تخنق جارك +20. الأسماء دي هتتضاف فوق أي نقط موجودة حاليًا، مش هتستبدلها. متأكد؟"
+        "هيتم إرجاع أسماء الفرق الأصلية (مدرسة عاشور، ايس كريم، بطاطس محمرة، ازاي تخنق جارك) بترتيب الفريق الأول للرابع، وإضافة النقط اللي كانت اتسجلت لكل واحد (+15، +10، +20، +20) فوق أي نقط موجودة حاليًا. متأكد؟"
       )
     ) {
       return;
@@ -359,7 +359,7 @@ export default function ScoreboardView({ teams, scoreLogs, isAdmin, onRefreshDat
               className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-[11px] sm:text-xs font-bold bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer"
               title="إضافة النقط اللي ضاعت بسبب الباج القديم (مرة واحدة بس)"
             >
-              <span>{isRestoringPoints ? "جارٍ الاستعادة..." : "استعادة نقط 27 أغسطس 🔧"}</span>
+              <span>{isRestoringPoints ? "جارٍ الاستعادة..." : "استعادة أسماء ونقط 27 أغسطس 🔧"}</span>
             </button>
           )}
 

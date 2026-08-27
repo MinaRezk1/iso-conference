@@ -851,34 +851,37 @@ export async function syncDay2ScheduleWithLatest() {
   }
 }
 
-// استعادة النقط اللي ضاعت بسبب الباج القديم (محسوبة من سجل النشاط بتاريخ ٢٧ أغسطس ٢٠٢٦)
-// بتضيف الفرق المفقود لأي فريق بالاسم الحالي بتاعه - مش بتستبدل كل حاجة.
+// استعادة أسماء ونقط الفرق اللي ضاعت بسبب الباج القديم (من سجل النشاط بتاريخ ٢٧ أغسطس ٢٠٢٦).
+// بترجع للفرق أسمائها الأصلية وتضيف لها النقط اللي كانت اتسجلت، بترتيب الفريق
+// الثابت (team1-team4) بنفس الترتيب اللي كانت عليه الأسماء وقت تسجيل النقط.
 export async function restoreLostPointsFromLog27Aug() {
-  const missingPoints: { [teamName: string]: number } = {
-    "مدرسة عاشور": 15,
-    "ايس كريم": 10,
-    "بطاطس محمرة": 20,
-    "ازاي تخنق جارك": 20
-  };
+  const restoreByOrder: { name: string; points: number }[] = [
+    { name: "مدرسة عاشور", points: 15 },
+    { name: "ايس كريم", points: 10 },
+    { name: "بطاطس محمرة", points: 20 },
+    { name: "ازاي تخنق جارك", points: 20 }
+  ];
 
   try {
     const teamsRef = collection(db, "teams");
     const snapshot = await getDocs(teamsRef);
+    const sorted = [...snapshot.docs].sort((a, b) => a.id.localeCompare(b.id));
+
     const batch = writeBatch(db);
     let matched = 0;
 
-    snapshot.forEach((docSnap) => {
-      const team = docSnap.data();
-      const teamName = team?.name;
-      if (teamName && missingPoints[teamName] !== undefined) {
-        const newScore = (team.totalScore || 0) + missingPoints[teamName];
-        batch.set(docSnap.ref, { totalScore: newScore }, { merge: true });
+    sorted.forEach((docSnap, idx) => {
+      if (idx < restoreByOrder.length) {
+        const team = docSnap.data();
+        const { name, points } = restoreByOrder[idx];
+        const newScore = (team.totalScore || 0) + points;
+        batch.set(docSnap.ref, { name, totalScore: newScore }, { merge: true });
         matched++;
       }
     });
 
     if (matched === 0) {
-      throw new Error("لم يتم العثور على أي فريق بنفس الأسماء المسجلة في السجل (مدرسة عاشور، ايس كريم، بطاطس محمرة، ازاي تخنق جارك). تأكد إن أسماء الفرق لسه زي ما هي.");
+      throw new Error("لم يتم العثور على أي فريق لتحديث بياناته.");
     }
 
     await batch.commit();
