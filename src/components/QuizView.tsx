@@ -29,6 +29,38 @@ interface QuizViewProps {
   groups: ConferenceGroup[];
 }
 
+const ARABIC_DIACRITICS = /[\u064B-\u065F\u0670]/g;
+
+function normalizeArabic(text: string): string {
+  return text
+    .replace(ARABIC_DIACRITICS, "")
+    .replace(/[أإآ]/g, "ا")
+    .replace(/ى/g, "ي")
+    .replace(/ة/g, "ه")
+    .replace(/[^\u0600-\u06FF\s]/g, " ")
+    .toLowerCase()
+    .trim();
+}
+
+function similarityHint(answer: string, reference: string): { pct: number; label: string; className: string } {
+  if (!answer.trim() || !reference.trim()) {
+    return { pct: 0, label: "بدون إجابة", className: "bg-slate-500/15 text-slate-400 border-slate-500/30" };
+  }
+  const answerWords = new Set(normalizeArabic(answer).split(/\s+/).filter((w) => w.length > 2));
+  const refWords = new Set(normalizeArabic(reference).split(/\s+/).filter((w) => w.length > 2));
+  if (refWords.size === 0) return { pct: 0, label: "—", className: "bg-slate-500/15 text-slate-400 border-slate-500/30" };
+
+  let overlap = 0;
+  refWords.forEach((w) => {
+    if (answerWords.has(w)) overlap++;
+  });
+  const pct = Math.round((overlap / refWords.size) * 100);
+
+  if (pct >= 60) return { pct, label: `🟢 تطابق ${pct}٪`, className: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30" };
+  if (pct >= 30) return { pct, label: `🟡 تطابق ${pct}٪`, className: "bg-amber-500/15 text-amber-300 border-amber-500/30" };
+  return { pct, label: `🔴 تطابق ${pct}٪`, className: "bg-rose-500/15 text-rose-300 border-rose-500/30" };
+}
+
 const LOCAL_STORAGE_KEY = "iso_quiz_proverbs_submitted_v1";
 
 export default function QuizView({ isAdmin, groups }: QuizViewProps) {
@@ -351,9 +383,19 @@ export default function QuizView({ isAdmin, groups }: QuizViewProps) {
                               </p>
                             ) : (
                               <div className="space-y-1.5">
-                                <p className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-slate-200 leading-relaxed">
-                                  {a?.textAnswer || "لم يُجب"}
-                                </p>
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <p className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-slate-200 leading-relaxed">
+                                    {a?.textAnswer || "لم يُجب"}
+                                  </p>
+                                  {a?.textAnswer && q.referenceAnswer && (() => {
+                                    const hint = similarityHint(a.textAnswer || "", q.referenceAnswer || "");
+                                    return (
+                                      <span className={`text-[10px] font-bold px-2 py-1 rounded-lg border shrink-0 ${hint.className}`}>
+                                        {hint.label}
+                                      </span>
+                                    );
+                                  })()}
+                                </div>
                                 {q.referenceAnswer && (
                                   <p className="text-emerald-300/80 text-[11px] flex items-start gap-1.5">
                                     <CheckCircle2 className="w-3.5 h-3.5 shrink-0 mt-0.5" />

@@ -1,11 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { 
-  getFirestore,
-  initializeFirestore, 
-  setLogLevel, 
-  persistentLocalCache, 
-  persistentMultipleTabManager 
-} from "firebase/firestore";
+import { getFirestore, setLogLevel } from "firebase/firestore";
 import firebaseConfig from "../../firebase-applet-config.json";
 
 // Silence non-fatal SDK network connection logs in container environments
@@ -18,30 +12,19 @@ try {
 // Initialize Firebase App
 const app = initializeApp(firebaseConfig);
 
-let db: ReturnType<typeof getFirestore>;
-
-try {
-  // Initialize with multi-tab persistence for real-time instant sync
-  db = firebaseConfig.firestoreDatabaseId
-    ? initializeFirestore(app, {
-        localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),
-      }, firebaseConfig.firestoreDatabaseId)
-    : initializeFirestore(app, {
-        localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),
-      });
-} catch (e) {
-  console.warn("Persistent cache initialization failed, falling back to standard getFirestore", e);
-  try {
-    db = firebaseConfig.firestoreDatabaseId
-      ? getFirestore(app, firebaseConfig.firestoreDatabaseId)
-      : getFirestore(app);
-  } catch (err) {
-    console.error("Firestore initialization error:", err);
-    db = getFirestore(app);
-  }
-}
+// NOTE: We deliberately do NOT use Firestore's offline persistent cache
+// here. With multiple admins editing shared live data (scores, rooms,
+// groups) at a conference where WiFi/cellular can be weak, persistence
+// makes writes appear to succeed instantly in the UI (from the local
+// cache) even when they haven't actually reached the server yet. If the
+// connection drops or the page is refreshed before the sync completes,
+// that change is silently lost with no error shown — exactly the "did
+// something, refreshed, and it vanished" symptom. Using plain
+// getFirestore() means every write's success/failure reflects the real
+// server state, and all connected users stay consistently in sync.
+const db = firebaseConfig.firestoreDatabaseId
+  ? getFirestore(app, firebaseConfig.firestoreDatabaseId)
+  : getFirestore(app);
 
 export { db };
-
-
 

@@ -89,6 +89,20 @@ export default function App() {
   };
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
   const [forceOpenAdminModal, setForceOpenAdminModal] = useState<boolean>(false);
+  const [isOnline, setIsOnline] = useState<boolean>(() =>
+    typeof navigator !== "undefined" ? navigator.onLine : true
+  );
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
 
   // Firestore Data State
   const [teams, setTeams] = useState<Team[]>(DEFAULT_TEAMS);
@@ -445,6 +459,13 @@ export default function App() {
       <div className="fixed top-0 inset-x-0 z-[100]">
         <InstallPrompt />
       </div>
+
+      {/* Offline Warning: any change made while offline won't reach the server */}
+      {!isOnline && (
+        <div className="fixed top-0 inset-x-0 z-[110] bg-rose-600 text-white text-center py-2 px-4 text-xs sm:text-sm font-bold shadow-lg" dir="rtl">
+          ⚠️ مفيش اتصال بالإنترنت دلوقتي - أي تعديل هتعمله لن يتم حفظه لحد ما الاتصال يرجع
+        </div>
+      )}
 
       {/* Automatic Voice and Sound Alerts for schedule */}
       <NotificationManager schedule={schedule} />
