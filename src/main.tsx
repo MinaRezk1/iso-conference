@@ -4,7 +4,11 @@ import App from './App.tsx';
 import './index.css';
 
 // --- Cache Busting Logic ---
-const APP_VERSION = '1.1.1';
+// __BUILD_TIME__ is injected automatically at build time (see vite.config.ts)
+// so this changes on every deploy without anyone needing to remember to
+// bump a version number by hand.
+declare const __BUILD_TIME__: string;
+const APP_VERSION = typeof __BUILD_TIME__ !== 'undefined' ? __BUILD_TIME__ : 'dev';
 const currentVersion = localStorage.getItem('appVersion');
 
 if (currentVersion !== APP_VERSION) {

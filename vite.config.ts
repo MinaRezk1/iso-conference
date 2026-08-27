@@ -7,6 +7,12 @@ import { VitePWA } from 'vite-plugin-pwa';
 export default defineConfig(() => {
   return {
     base: '/iso-conference/', // مهم: لازم يتساوي مع اسم الريبو بتاعك على GitHub بالظبط
+    define: {
+      // يتولد تلقائياً وقت كل بناء (build) - بيضمن إن أي متصفح فتح الموقع قبل
+      // كده يكتشف فيه نسخة جديدة ويجيبها، من غير ما حد يحتاج يفتكر يبدّل رقم
+      // النسخة يدوياً في كل مرة.
+      __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
+    },
     plugins: [
       react(), 
       tailwindcss(),

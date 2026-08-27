@@ -1,4 +1,4 @@
-const CACHE_NAME = "iso-v3";
+const CACHE_NAME = "iso-v4-2026-08-27";
 
 // Install Event - skip waiting immediately
 self.addEventListener("install", () => {
