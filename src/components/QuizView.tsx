@@ -18,9 +18,7 @@ import {
   addDoc,
   doc,
   updateDoc,
-  serverTimestamp,
-  query,
-  orderBy
+  serverTimestamp
 } from "firebase/firestore";
 import { seedQuizQuestionsIfEmpty, INITIAL_QUIZ_QUESTIONS } from "../lib/seedData";
 
@@ -115,12 +113,16 @@ export default function QuizView({ isAdmin, groups }: QuizViewProps) {
   useEffect(() => {
     if (!isAdmin) return;
     setLoadingSubmissions(true);
-    const q = query(collection(db, "quizSubmissions"), orderBy("submittedAt", "desc"));
     const unsub = onSnapshot(
-      q,
+      collection(db, "quizSubmissions"),
       (snap) => {
         const data: QuizSubmission[] = [];
         snap.forEach((d) => data.push({ id: d.id, ...d.data() } as QuizSubmission));
+        data.sort((a, b) => {
+          const ta = a.submittedAt ? new Date(a.submittedAt as any).getTime() || 0 : 0;
+          const tb = b.submittedAt ? new Date(b.submittedAt as any).getTime() || 0 : 0;
+          return tb - ta;
+        });
         setSubmissions(data);
         setLoadingSubmissions(false);
       },

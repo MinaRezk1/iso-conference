@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { History, User, Clock, Trash2 } from "lucide-react";
 import { db } from "../lib/firebase";
-import { collection, query, orderBy, limit, onSnapshot, deleteDoc, doc, getDocs, writeBatch } from "firebase/firestore";
+import { collection, onSnapshot, getDocs, writeBatch } from "firebase/firestore";
 import { ActivityLogEntry } from "../types";
 
 // شاشة سجل النشاط - تظهر بس للمسؤول الأساسي (MinaRezk) عشان يتابع
@@ -12,13 +12,20 @@ export default function ActivityLogView() {
   const [isClearing, setIsClearing] = useState(false);
 
   useEffect(() => {
-    const q = query(collection(db, "activityLog"), orderBy("timestamp", "desc"), limit(200));
     const unsub = onSnapshot(
-      q,
+      collection(db, "activityLog"),
       (snap) => {
         const list: ActivityLogEntry[] = [];
         snap.forEach((d) => list.push({ id: d.id, ...d.data() } as ActivityLogEntry));
-        setEntries(list);
+        // نرتب في المتصفح بدل ما نطلب من قاعدة البيانات ترتب - نفس الطريقة
+        // المستخدمة في باقي الموقع، عشان أي سجل فيه أي اختلاف بسيط في شكل
+        // التاريخ يفضل ظاهر بدل ما يختفي بصمت.
+        list.sort((a, b) => {
+          const ta = a.timestamp ? new Date(a.timestamp).getTime() : 0;
+          const tb = b.timestamp ? new Date(b.timestamp).getTime() : 0;
+          return tb - ta;
+        });
+        setEntries(list.slice(0, 200));
         setLoading(false);
       },
       (err) => {
