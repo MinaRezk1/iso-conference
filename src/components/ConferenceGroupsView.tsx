@@ -295,10 +295,10 @@ export default function ConferenceGroupsView({ groups, isAdmin, onRefreshData }:
               <span>تقسيم مجموعات مؤتمر ISO 2026</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-              توزيع مجموعات الأولاد (G1 - G4)
+              توزيع مجموعات المؤتمر
             </h1>
             <p className="text-xs sm:text-sm text-slate-300 mt-1.5 leading-relaxed max-w-2xl font-medium">
-              توزيع الأولاد في الورش والدراسات اليومية للمؤتمر. يمكنك البحث باسم الولد، أو نقل أي عضو بين المجموعات بسهولة.
+              توزيع الأعضاء في الورش والدراسات اليومية للمؤتمر. يمكنك البحث بالاسم، أو نقل أي عضو بين المجموعات بسهولة.
             </p>
           </div>
 
@@ -347,7 +347,7 @@ export default function ConferenceGroupsView({ groups, isAdmin, onRefreshData }:
                   : "bg-white/5 border-white/10 hover:border-white/20"
               }`}
             >
-              <span className="text-[10px] font-bold text-slate-400 block truncate">{g.code}</span>
+              <span className="text-[10px] font-bold text-slate-400 block truncate">{g.name}</span>
               <span className="text-base sm:text-lg font-black text-white mt-0.5 block">{g.members?.length || 0} عضو</span>
             </div>
           ))}
@@ -397,13 +397,13 @@ export default function ConferenceGroupsView({ groups, isAdmin, onRefreshData }:
                   : "bg-slate-900/80 text-slate-400 border-slate-800 hover:text-white"
               }`}
             >
-              {g.code} ({g.members?.length || 0})
+              {g.name} ({g.members?.length || 0})
             </button>
           ))}
         </div>
       </div>
 
-      {/* Conference Groups Grid (G1 - G4) */}
+      {/* Conference Groups Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {filteredGroups.map((group) => {
           const isHighlighted = searchTerm.trim().length > 0;
@@ -423,7 +423,7 @@ export default function ConferenceGroupsView({ groups, isAdmin, onRefreshData }:
                       className="w-10 h-10 rounded-2xl flex items-center justify-center font-black text-sm text-white shadow-lg shrink-0"
                       style={{ backgroundColor: group.color || "#6366f1" }}
                     >
-                      {group.code}
+                      {group.name?.charAt(0) || "?"}
                     </div>
                     <div>
                       <div className="flex items-center gap-1.5">
@@ -544,9 +544,8 @@ export default function ConferenceGroupsView({ groups, isAdmin, onRefreshData }:
               </div>
 
               {/* Group Footer */}
-              <div className="mt-5 pt-3 border-t border-white/5 flex items-center justify-between text-[11px] text-slate-500 font-bold">
+              <div className="mt-5 pt-3 border-t border-white/5 flex items-center justify-center text-[11px] text-slate-500 font-bold">
                 <span>ISO Conference 2026</span>
-                <span className="text-indigo-400/80">{group.code}</span>
               </div>
             </div>
           );
@@ -742,7 +741,7 @@ export default function ConferenceGroupsView({ groups, isAdmin, onRefreshData }:
             <form onSubmit={handleSaveGroupName} className="space-y-4">
               <div>
                 <label className="text-xs font-bold text-slate-300 block mb-2">
-                  الاسم الجديد ({editGroupData.code})
+                  الاسم الجديد
                 </label>
                 <input
                   type="text"
@@ -780,7 +779,7 @@ export default function ConferenceGroupsView({ groups, isAdmin, onRefreshData }:
                 <Edit3 className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-lg font-black text-white">تعديل اسم الولد</h3>
+                <h3 className="text-lg font-black text-white">تعديل بيانات العضو</h3>
                 <p className="text-xs text-slate-400 mt-0.5">تعديل أي خطأ مطبعي في اسم العضو</p>
               </div>
             </div>
@@ -850,7 +849,7 @@ export default function ConferenceGroupsView({ groups, isAdmin, onRefreshData }:
 
             <h3 className="text-lg font-black text-white">إعادة تعيين القائمة الأصلية؟</h3>
             <p className="text-xs text-slate-300 mt-2 leading-relaxed font-medium">
-              سيتم إعادة توزيع المجموعات الاربعة (G1 - G4) وحفظ الـ 32 اسماً الأصلية كما وردت في مستند المؤتمر.
+              سيتم إعادة توزيع المجموعات الأربعة وحفظ الأسماء والأدوار كما هي محفوظة حاليًا في الكود.
             </p>
 
             <div className="flex items-center gap-2 mt-6">
