@@ -297,17 +297,18 @@ export default function App() {
       collection(db, "conferenceGroups"),
       (snapshot) => {
         if (!active) return;
-        if (snapshot.empty) {
-          seedConferenceGroupsIfEmpty();
-          setConferenceGroups(INITIAL_CONFERENCE_GROUPS);
-        } else {
-          const groupsData: ConferenceGroup[] = [];
-          snapshot.forEach((docSnap) => {
-            groupsData.push({ id: docSnap.id, ...docSnap.data() } as ConferenceGroup);
-          });
-          groupsData.sort((a, b) => a.id.localeCompare(b.id));
-          setConferenceGroups(groupsData);
-        }
+        const groupsData: ConferenceGroup[] = [];
+        snapshot.forEach((docSnap) => {
+          groupsData.push({ id: docSnap.id, ...docSnap.data() } as ConferenceGroup);
+        });
+        groupsData.sort((a, b) => a.id.localeCompare(b.id));
+        // Local-only UI fallback if genuinely empty — never writes to Firestore
+        // from here. Writing was the bug: a brief network hiccup could make a
+        // live listener see a momentary empty snapshot and this used to
+        // permanently overwrite real member edits with the original seed
+        // names. Actual first-time seeding still happens once, safely,
+        // via the one-time getDocs() check in runBackgroundMigrations below.
+        setConferenceGroups(groupsData.length ? groupsData : INITIAL_CONFERENCE_GROUPS);
         setIsLoading(false);
       },
       (err) => {
@@ -324,12 +325,20 @@ export default function App() {
     const runBackgroundMigrations = async () => {
       if (!navigator.onLine) return;
       try {
-        await seedDatabaseIfEmpty();
+        // NOTE: seedDatabaseIfEmpty() used to run here automatically on every
+        // single page load. It only checked whether the "teams" collection
+        // was empty, but if that one check ever misfired (e.g. a brief
+        // connectivity hiccup during the read — very plausible on venue
+        // WiFi), it would reset every team's score to zero AND overwrite
+        // schedule, songs, lessons, and rooms back to their original
+        // hardcoded defaults, all driven by that single collection's state.
+        // This matches exactly what was reported: scores and other content
+        // silently reverting. The live site already has real data, so this
+        // bootstrap-only step is no longer needed automatically — the admin
+        // panel's own "Reset Database" button remains available for a
+        // deliberate, confirmed reset if a fresh install is ever needed.
         await seedConferenceGroupsIfEmpty();
         await seedAdminUsersIfEmpty();
-        await syncIsoScheduleAndLessons();
-
-        // Automatic ISO songs and lessons synchronization is handled in syncIsoScheduleAndLessons()
 
       } catch (err) {
         console.warn("Background migration note:", err);

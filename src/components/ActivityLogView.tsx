@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
-import { History, User, Clock, Trash2 } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import { History, User, Clock, Trash2, Download, Upload } from "lucide-react";
 import { db } from "../lib/firebase";
-import { collection, onSnapshot, getDocs, writeBatch } from "firebase/firestore";
+import { collection, onSnapshot, getDocs, writeBatch, doc, addDoc } from "firebase/firestore";
 import { ActivityLogEntry } from "../types";
 
 // شاشة سجل النشاط - تظهر بس للمسؤول الأساسي (MinaRezk) عشان يتابع
@@ -10,6 +10,8 @@ export default function ActivityLogView() {
   const [entries, setEntries] = useState<ActivityLogEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [isClearing, setIsClearing] = useState(false);
+  const [isRestoring, setIsRestoring] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const unsub = onSnapshot(
@@ -45,6 +47,73 @@ export default function ActivityLogView() {
     }
   };
 
+  const handleDownloadLog = () => {
+    const dataToExport = {
+      exportedAt: new Date().toISOString(),
+      entries
+    };
+    const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `سجل-النشاط-${new Date().toISOString().split("T")[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleRestoreClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleRestoreFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (evt) => {
+      try {
+        const text = evt.target?.result as string;
+        const parsed = JSON.parse(text);
+        const entriesToRestore: ActivityLogEntry[] = Array.isArray(parsed?.entries) ? parsed.entries : Array.isArray(parsed) ? parsed : [];
+
+        if (entriesToRestore.length === 0) {
+          alert("الملف ده مفيهوش سجل نشاط صالح للاستعادة.");
+          return;
+        }
+        if (
+          !window.confirm(
+            `هيتم إضافة ${entriesToRestore.length} سجل من الملف ده لسجل النشاط الحالي (من غير ما يمسح الموجود). متأكد؟`
+          )
+        ) {
+          return;
+        }
+
+        setIsRestoring(true);
+        const chunkSize = 400;
+        for (let i = 0; i < entriesToRestore.length; i += chunkSize) {
+          const chunk = entriesToRestore.slice(i, i + chunkSize);
+          const batch = writeBatch(db);
+          chunk.forEach((entry) => {
+            const { id, ...rest } = entry;
+            const docRef = doc(collection(db, "activityLog"));
+            batch.set(docRef, rest);
+          });
+          await batch.commit();
+        }
+        alert(`تمت استعادة ${entriesToRestore.length} سجل بنجاح! هتظهر تلقائي في القائمة.`);
+      } catch (err) {
+        console.error(err);
+        alert("حدث خطأ أثناء قراءة أو استعادة الملف - تأكد إنه ملف سجل نشاط صحيح.");
+      } finally {
+        setIsRestoring(false);
+        if (fileInputRef.current) fileInputRef.current.value = "";
+      }
+    };
+    reader.readAsText(file);
+  };
+
   const handleClearLog = async () => {
     if (!window.confirm("هيتم حذف كل سجل النشاط نهائياً. متأكد؟")) return;
     setIsClearing(true);
@@ -63,7 +132,7 @@ export default function ActivityLogView() {
 
   return (
     <div className="space-y-5 animate-fade-in text-white">
-      <div className="flex items-center justify-between gap-3 border-b border-white/10 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-5">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center text-indigo-300 shrink-0">
             <History className="w-5 h-5" />
@@ -73,14 +142,39 @@ export default function ActivityLogView() {
             <p className="text-[11px] text-slate-400">آخر {entries.length} حركة — مين عمل إيه وإمتى</p>
           </div>
         </div>
-        <button
-          onClick={handleClearLog}
-          disabled={isClearing || entries.length === 0}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-bold bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer shrink-0"
-        >
-          <Trash2 className="w-3.5 h-3.5" />
-          <span>مسح السجل</span>
-        </button>
+        <div className="flex items-center gap-2 flex-wrap">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="application/json"
+            onChange={handleRestoreFile}
+            className="hidden"
+          />
+          <button
+            onClick={handleDownloadLog}
+            disabled={entries.length === 0}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-bold bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
+          >
+            <Download className="w-3.5 h-3.5" />
+            <span>تحميل</span>
+          </button>
+          <button
+            onClick={handleRestoreClick}
+            disabled={isRestoring}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-bold bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-300 border border-indigo-500/30 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
+          >
+            <Upload className="w-3.5 h-3.5" />
+            <span>{isRestoring ? "جارٍ الاستعادة..." : "استعادة"}</span>
+          </button>
+          <button
+            onClick={handleClearLog}
+            disabled={isClearing || entries.length === 0}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-bold bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+            <span>مسح</span>
+          </button>
+        </div>
       </div>
 
       {loading ? (
