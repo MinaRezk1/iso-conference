@@ -28,6 +28,7 @@ import {
 import { Team, ScoreLog } from "../types";
 import { db } from "../lib/firebase";
 import { logActivity } from "../lib/activityLog";
+import { restoreLostPointsFromLog27Aug } from "../lib/seedData";
 import { 
   collection, 
   addDoc, 
@@ -56,6 +57,30 @@ export default function ScoreboardView({ teams, scoreLogs, isAdmin, onRefreshDat
   const [showEditTeam, setShowEditTeam] = useState<Team | null>(null);
   const [selectedTeamForDetails, setSelectedTeamForDetails] = useState<Team | null>(null);
   const [showAddTeam, setShowAddTeam] = useState(false);
+  const [isRestoringPoints, setIsRestoringPoints] = useState(false);
+
+  const handleRestoreLostPoints = async () => {
+    if (!isAdmin) return;
+    if (
+      !window.confirm(
+        "هيتم إضافة النقط اللي ضاعت بسبب الباج القديم (محسوبة من سجل النشاط): مدرسة عاشور +15، ايس كريم +10، بطاطس محمرة +20، ازاي تخنق جارك +20. الأسماء دي هتتضاف فوق أي نقط موجودة حاليًا، مش هتستبدلها. متأكد؟"
+      )
+    ) {
+      return;
+    }
+    setIsRestoringPoints(true);
+    try {
+      const matched = await restoreLostPointsFromLog27Aug();
+      logActivity("استعادة نقط من السجل", `تم تحديث ${matched} فريق بناءً على سجل النشاط بتاريخ 27 أغسطس`);
+      onRefreshData();
+      alert(`تمت استعادة النقط لـ ${matched} فريق بنجاح!`);
+    } catch (err: any) {
+      console.error(err);
+      alert(err?.message || "حدث خطأ أثناء استعادة النقط.");
+    } finally {
+      setIsRestoringPoints(false);
+    }
+  };
   const [tvMode, setTvMode] = useState(false);
   const [showPointsModal, setShowPointsModal] = useState(false);
 
@@ -324,6 +349,17 @@ export default function ScoreboardView({ teams, scoreLogs, isAdmin, onRefreshDat
             >
               <Plus className="w-4 h-4 stroke-[3]" />
               <span>إضافة نقاط ➕</span>
+            </button>
+          )}
+
+          {isAdmin && (
+            <button
+              onClick={handleRestoreLostPoints}
+              disabled={isRestoringPoints}
+              className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-[11px] sm:text-xs font-bold bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer"
+              title="إضافة النقط اللي ضاعت بسبب الباج القديم (مرة واحدة بس)"
+            >
+              <span>{isRestoringPoints ? "جارٍ الاستعادة..." : "استعادة نقط 27 أغسطس 🔧"}</span>
             </button>
           )}
 

@@ -19,14 +19,15 @@ export const INITIAL_CONFERENCE_GROUPS: ConferenceGroup[] = [
     bgColor: "bg-emerald-500/10",
     borderColor: "border-emerald-500/30",
     members: [
-      { id: "g1_1", name: "يوسف نحميا" },
-      { id: "g1_2", name: "كيرلس اسامة" },
-      { id: "g1_3", name: "جوناثان ياسر" },
-      { id: "g1_4", name: "أبانوب مايكل" },
-      { id: "g1_5", name: "أنطونيوس سامح" },
-      { id: "g1_6", name: "كيرلس ماجد" },
-      { id: "g1_7", name: "بولا مايكل" },
-      { id: "g1_8", name: "أبانوب هاني" },
+      { id: "m_g1_01", name: "ماريا ماجد", role: "makhdooma" },
+      { id: "m_g1_02", name: "مريم فايز", role: "makhdooma" },
+      { id: "m_g1_03", name: "جومانا ايهاب", role: "makhdooma" },
+      { id: "m_g1_04", name: "مينا هاني", role: "makhdoom" },
+      { id: "m_g1_05", name: "فيلوباتير سعيد", role: "makhdoom" },
+      { id: "m_g1_06", name: "مينا ميلاد", role: "makhdoom" },
+      { id: "m_g1_07", name: "مارك عادل", role: "makhdoom" },
+      { id: "m_g1_08", name: "ماريو اميل", role: "makhdoom" },
+      { id: "m_g1_09", name: "فادي مفيد", role: "makhdoom" }
     ]
   },
   {
@@ -37,14 +38,15 @@ export const INITIAL_CONFERENCE_GROUPS: ConferenceGroup[] = [
     bgColor: "bg-violet-500/10",
     borderColor: "border-violet-500/30",
     members: [
-      { id: "g2_1", name: "مينا مايكل" },
-      { id: "g2_2", name: "إبرام داوود" },
-      { id: "g2_3", name: "مرقس معوض" },
-      { id: "g2_4", name: "أندرو صفوت" },
-      { id: "g2_5", name: "أنطون طارق" },
-      { id: "g2_6", name: "ديفيد سامح" },
-      { id: "g2_7", name: "ماركو عاطف" },
-      { id: "g2_8", name: "مينا هاني" },
+      { id: "m_g2_01", name: "كاترين حسني", role: "makhdooma" },
+      { id: "m_g2_02", name: "جيسيكا نعيم", role: "makhdooma" },
+      { id: "m_g2_03", name: "جوليا جميل", role: "makhdooma" },
+      { id: "m_g2_04", name: "كيريا سامح", role: "makhdooma" },
+      { id: "m_g2_05", name: "مريم فايز", role: "makhdooma" },
+      { id: "m_g2_06", name: "مينا مرقس", role: "makhdoom" },
+      { id: "m_g2_07", name: "فادي عصام", role: "makhdoom" },
+      { id: "m_g2_08", name: "مجدي عادل", role: "makhdoom" },
+      { id: "m_g2_09", name: "كيرلس سعيد", role: "makhdoom" }
     ]
   },
   {
@@ -55,14 +57,14 @@ export const INITIAL_CONFERENCE_GROUPS: ConferenceGroup[] = [
     bgColor: "bg-amber-500/10",
     borderColor: "border-amber-500/30",
     members: [
-      { id: "g3_1", name: "ماريو وائل" },
-      { id: "g3_2", name: "يوسف جورج" },
-      { id: "g3_3", name: "فادي إيهاب" },
-      { id: "g3_4", name: "نوفير جورج" },
-      { id: "g3_5", name: "توني سعيد" },
-      { id: "g3_6", name: "جيوفاني هاني" },
-      { id: "g3_7", name: "جورج شريف" },
-      { id: "g3_8", name: "مينا جرجس" },
+      { id: "m_g3_01", name: "فيرينا فتح الله", role: "makhdooma" },
+      { id: "m_g3_02", name: "ندي ريمون", role: "makhdooma" },
+      { id: "m_g3_03", name: "جاسمين عوض", role: "makhdooma" },
+      { id: "m_g3_04", name: "مريم عماد", role: "makhdooma" },
+      { id: "m_g3_05", name: "سوسنة عماد", role: "makhdooma" },
+      { id: "m_g3_06", name: "كيرلس جرجس", role: "makhdoom" },
+      { id: "m_g3_07", name: "بافلي عزمي", role: "makhdoom" },
+      { id: "m_g3_08", name: "اندرو ماجد", role: "makhdoom" }
     ]
   },
   {
@@ -73,14 +75,15 @@ export const INITIAL_CONFERENCE_GROUPS: ConferenceGroup[] = [
     bgColor: "bg-rose-500/10",
     borderColor: "border-rose-500/30",
     members: [
-      { id: "g4_1", name: "بولا ياسر" },
-      { id: "g4_2", name: "أنطونيوس سمير" },
-      { id: "g4_3", name: "أبانوب داوود" },
-      { id: "g4_4", name: "جيوفاني مايكل" },
-      { id: "g4_5", name: "جوسيان جرجس" },
-      { id: "g4_6", name: "فيلوباتير خلف" },
-      { id: "g4_7", name: "أبانوب إيليا" },
-      { id: "g4_8", name: "جرجس نبيل" },
+      { id: "m_g4_01", name: "ايريني اسامه", role: "makhdooma" },
+      { id: "m_g4_02", name: "ساندرا بهاء", role: "makhdooma" },
+      { id: "m_g4_03", name: "كارين مجدي", role: "makhdooma" },
+      { id: "m_g4_04", name: "ايريني فريد", role: "makhdooma" },
+      { id: "m_g4_05", name: "كيرلس هاني", role: "makhdoom" },
+      { id: "m_g4_06", name: "رافي سعيد", role: "makhdoom" },
+      { id: "m_g4_07", name: "مارينا وديع", role: "makhdooma" },
+      { id: "m_g4_08", name: "مونيكا وديع", role: "makhdooma" },
+      { id: "m_g4_09", name: "يوسف نحميا", role: "makhdoom" }
     ]
   }
 ];
@@ -594,16 +597,76 @@ export const INITIAL_ROOMS: Room[] = [
   // النوع والمبنى قيم مبدئية قابلة للتعديل من "تعديل الغرفة" في لوحة الأدمن
   { id: "room101", roomNumber: "١٠١", building: "مبنى الإقامة", floor: "الدور الأول", type: "boys", capacity: 6, occupants: [] },
   { id: "room102", roomNumber: "١٠٢", building: "مبنى الإقامة", floor: "الدور الأول", type: "boys", capacity: 6, occupants: [] },
-  { id: "room103", roomNumber: "١٠٣", building: "مبنى الإقامة", floor: "الدور الأول", type: "boys", capacity: 6, occupants: [] },
-  { id: "room104", roomNumber: "١٠٤", building: "مبنى الإقامة", floor: "الدور الأول", type: "boys", capacity: 6, occupants: [] },
-  { id: "room105", roomNumber: "١٠٥", building: "مبنى الإقامة", floor: "الدور الأول", type: "boys", capacity: 6, occupants: [] },
-  { id: "room106", roomNumber: "١٠٦", building: "مبنى الإقامة", floor: "الدور الأول", type: "boys", capacity: 6, occupants: [] },
-  { id: "room107", roomNumber: "١٠٧", building: "مبنى الإقامة", floor: "الدور الأول", type: "boys", capacity: 5, occupants: [] },
-  { id: "room108", roomNumber: "١٠٨", building: "مبنى الإقامة", floor: "الدور الأول", type: "boys", capacity: 3, occupants: [] },
-  { id: "room109", roomNumber: "١٠٩", building: "مبنى الإقامة", floor: "الدور الأول", type: "boys", capacity: 6, occupants: [] },
-  { id: "room110", roomNumber: "١١٠", building: "مبنى الإقامة", floor: "الدور الأول", type: "boys", capacity: 4, occupants: [] },
-  { id: "room111", roomNumber: "١١١", building: "مبنى الإقامة", floor: "الدور الأول", type: "boys", capacity: 6, occupants: [] },
-  { id: "room112", roomNumber: "١١٢", building: "مبنى الإقامة", floor: "الدور الأول", type: "boys", capacity: 6, occupants: [] }
+  { id: "room103", roomNumber: "١٠٣", building: "مبنى الإقامة", floor: "الدور الأول", type: "girls", capacity: 6, occupants: [
+    { name: "مريم فايز", role: "makhdooma" },
+    { name: "جاسمين عوض", role: "makhdooma" },
+    { name: "ميرفت عزيز", role: "khadema" },
+    { name: "مريم نعمان", role: "khadema" }
+  ] },
+  { id: "room104", roomNumber: "١٠٤", building: "مبنى الإقامة", floor: "الدور الأول", type: "boys", capacity: 6, occupants: [
+    { name: "كيرلس سعيد", role: "makhdoom" },
+    { name: "ماريو اميل", role: "makhdoom" },
+    { name: "بطرس بدر", role: "khadem" },
+    { name: "عماد سليمان", role: "khadem" },
+    { name: "اندرو ماجد", role: "makhdoom" }
+  ] },
+  { id: "room105", roomNumber: "١٠٥", building: "مبنى الإقامة", floor: "الدور الأول", type: "boys", capacity: 6, occupants: [
+    { name: "مينا مرقس", role: "makhdoom" },
+    { name: "مينا هاني", role: "makhdoom" },
+    { name: "فادي عصام", role: "makhdoom" },
+    { name: "مجدي عادل", role: "makhdoom" },
+    { name: "مينا عادل", role: "khadem" },
+    { name: "بيشوي مجدي", role: "khadem" }
+  ] },
+  { id: "room106", roomNumber: "١٠٦", building: "مبنى الإقامة", floor: "الدور الأول", type: "boys", capacity: 6, occupants: [
+    { name: "رافي سعيد", role: "makhdoom" },
+    { name: "كيرلس جرجس", role: "makhdoom" },
+    { name: "بافلي عزمي", role: "makhdoom" },
+    { name: "مارك عادل", role: "makhdoom" },
+    { name: "كيرلس هاني", role: "makhdoom" },
+    { name: "فيلوباتير سعيد", role: "makhdoom" }
+  ] },
+  { id: "room107", roomNumber: "١٠٧", building: "مبنى الإقامة", floor: "الدور الأول", type: "boys", capacity: 5, occupants: [
+    { name: "ايهاب بطرس", role: "khadem" },
+    { name: "طاسوني انجي", role: "khadema" },
+    { name: "فادي ايهاب", role: "makhdoom" },
+    { name: "مويرا ايهاب", role: "makhdooma" }
+  ] },
+  { id: "room108", roomNumber: "١٠٨", building: "مبنى الإقامة", floor: "الدور الأول", type: "boys", capacity: 3, occupants: [
+    { name: "فادي منير", role: "khadem" },
+    { name: "مارينا مكرم", role: "khadema" },
+    { name: "دانيال فادي", role: "makhdoom" }
+  ] },
+  { id: "room109", roomNumber: "١٠٩", building: "مبنى الإقامة", floor: "الدور الأول", type: "girls", capacity: 6, occupants: [
+    { name: "ندي ريمون", role: "makhdooma" },
+    { name: "فيرينا فتح الله", role: "makhdooma" },
+    { name: "جومانه ايهاب", role: "makhdooma" },
+    { name: "مريم عماد", role: "makhdooma" },
+    { name: "بربارة رجائي", role: "khadema" },
+    { name: "جوليا جميل", role: "makhdooma" }
+  ] },
+  { id: "room110", roomNumber: "١١٠", building: "مبنى الإقامة", floor: "الدور الأول", type: "girls", capacity: 4, occupants: [
+    { name: "كاترين حسني", role: "makhdooma" },
+    { name: "جيسيكا نعيم", role: "makhdooma" },
+    { name: "مريم بدر", role: "khadema" },
+    { name: "نيرمين عبد التواب", role: "khadema" }
+  ] },
+  { id: "room111", roomNumber: "١١١", building: "مبنى الإقامة", floor: "الدور الأول", type: "girls", capacity: 6, occupants: [
+    { name: "مارينا وديع", role: "makhdooma" },
+    { name: "مونيكا وديع", role: "makhdooma" },
+    { name: "ساندرا بهاء", role: "makhdooma" },
+    { name: "ايريني اسامه", role: "makhdooma" },
+    { name: "كارين مجدي", role: "makhdooma" },
+    { name: "راندا عاطف", role: "khadema" }
+  ] },
+  { id: "room112", roomNumber: "١١٢", building: "مبنى الإقامة", floor: "الدور الأول", type: "girls", capacity: 6, occupants: [
+    { name: "سوسنة عماد", role: "makhdooma" },
+    { name: "مريم فايز", role: "makhdooma" },
+    { name: "ماريا ماجد", role: "makhdooma" },
+    { name: "كيريا سامح", role: "makhdooma" },
+    { name: "ايريني فريد", role: "makhdooma" },
+    { name: "مريم عياد", role: "khadema" }
+  ] }
 ];
 
 export const INITIAL_SCORE_LOGS: ScoreLog[] = [];
@@ -784,6 +847,44 @@ export async function syncDay2ScheduleWithLatest() {
     console.log("Day 2 schedule synced successfully!");
   } catch (e) {
     console.error("Error syncing Day 2 schedule:", e);
+    throw e;
+  }
+}
+
+// استعادة النقط اللي ضاعت بسبب الباج القديم (محسوبة من سجل النشاط بتاريخ ٢٧ أغسطس ٢٠٢٦)
+// بتضيف الفرق المفقود لأي فريق بالاسم الحالي بتاعه - مش بتستبدل كل حاجة.
+export async function restoreLostPointsFromLog27Aug() {
+  const missingPoints: { [teamName: string]: number } = {
+    "مدرسة عاشور": 15,
+    "ايس كريم": 10,
+    "بطاطس محمرة": 20,
+    "ازاي تخنق جارك": 20
+  };
+
+  try {
+    const teamsRef = collection(db, "teams");
+    const snapshot = await getDocs(teamsRef);
+    const batch = writeBatch(db);
+    let matched = 0;
+
+    snapshot.forEach((docSnap) => {
+      const team = docSnap.data();
+      const teamName = team?.name;
+      if (teamName && missingPoints[teamName] !== undefined) {
+        const newScore = (team.totalScore || 0) + missingPoints[teamName];
+        batch.set(docSnap.ref, { totalScore: newScore }, { merge: true });
+        matched++;
+      }
+    });
+
+    if (matched === 0) {
+      throw new Error("لم يتم العثور على أي فريق بنفس الأسماء المسجلة في السجل (مدرسة عاشور، ايس كريم، بطاطس محمرة، ازاي تخنق جارك). تأكد إن أسماء الفرق لسه زي ما هي.");
+    }
+
+    await batch.commit();
+    return matched;
+  } catch (e) {
+    console.error("Error restoring lost points:", e);
     throw e;
   }
 }
