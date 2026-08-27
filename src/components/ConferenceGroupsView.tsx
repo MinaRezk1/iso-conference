@@ -51,6 +51,8 @@ export default function ConferenceGroupsView({ groups, isAdmin, onRefreshData }:
   const [editMemberRole, setEditMemberRole] = useState<PersonRole>("makhdoom");
 
   const [showResetConfirm, setShowResetConfirm] = useState<boolean>(false);
+  const [editGroupData, setEditGroupData] = useState<ConferenceGroup | null>(null);
+  const [editGroupName, setEditGroupName] = useState<string>("");
   const [actionLoading, setActionLoading] = useState<boolean>(false);
 
   // Group stats
@@ -233,6 +235,31 @@ export default function ConferenceGroupsView({ groups, isAdmin, onRefreshData }:
   };
 
   // Reset to original PDF list
+  const handleOpenEditGroup = (group: ConferenceGroup) => {
+    setEditGroupData(group);
+    setEditGroupName(group.name);
+  };
+
+  const handleSaveGroupName = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isAdmin) return;
+    if (!editGroupData || !editGroupName.trim()) return;
+
+    setActionLoading(true);
+    try {
+      const docRef = doc(db, "conferenceGroups", editGroupData.id);
+      await setDoc(docRef, { name: editGroupName.trim() }, { merge: true });
+      logActivity("تعديل اسم مجموعة", `${editGroupData.name} → ${editGroupName.trim()}`);
+      setEditGroupData(null);
+      if (onRefreshData) onRefreshData();
+    } catch (err) {
+      console.error("Error editing group name:", err);
+      alert("حدث خطأ أثناء تعديل اسم المجموعة.");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   const handleResetToDefault = async () => {
     if (!isAdmin) return;
     setActionLoading(true);
@@ -399,9 +426,20 @@ export default function ConferenceGroupsView({ groups, isAdmin, onRefreshData }:
                       {group.code}
                     </div>
                     <div>
-                      <h3 className="text-base font-black text-white">
-                        {group.name}
-                      </h3>
+                      <div className="flex items-center gap-1.5">
+                        <h3 className="text-base font-black text-white">
+                          {group.name}
+                        </h3>
+                        {isAdmin && (
+                          <button
+                            onClick={() => handleOpenEditGroup(group)}
+                            className="p-1 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer shrink-0"
+                            title="تعديل اسم المجموعة"
+                          >
+                            <Edit3 className="w-3 h-3" />
+                          </button>
+                        )}
+                      </div>
                       <p className="text-[11px] font-bold text-slate-400 mt-0.5">
                         عدد الأعضاء الحالي: <span className="text-amber-400">{group.members?.length || 0} فرد</span>
                       </p>
@@ -689,6 +727,44 @@ export default function ConferenceGroupsView({ groups, isAdmin, onRefreshData }:
       )}
 
       {/* Edit Member Modal */}
+      {editGroupData && (
+        <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4" dir="rtl">
+          <div className="bg-slate-900 border border-white/10 rounded-3xl p-6 w-full max-w-sm">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-black text-white">تعديل اسم المجموعة</h3>
+              <button
+                onClick={() => setEditGroupData(null)}
+                className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <form onSubmit={handleSaveGroupName} className="space-y-4">
+              <div>
+                <label className="text-xs font-bold text-slate-300 block mb-2">
+                  الاسم الجديد ({editGroupData.code})
+                </label>
+                <input
+                  type="text"
+                  value={editGroupName}
+                  onChange={(e) => setEditGroupName(e.target.value)}
+                  required
+                  autoFocus
+                  className="w-full px-4 py-3 rounded-xl border border-slate-700 bg-slate-950 text-white text-xs font-bold focus:outline-none focus:border-indigo-500"
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={actionLoading}
+                className="w-full py-3 rounded-xl text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 transition-colors shadow-lg shadow-indigo-600/30 cursor-pointer disabled:opacity-50"
+              >
+                {actionLoading ? "جاري الحفظ..." : "حفظ الاسم"}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
       {editMemberData && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md" dir="rtl">
           <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-6 shadow-2xl relative text-slate-100 animate-scale-up">

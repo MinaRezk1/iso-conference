@@ -13,7 +13,7 @@ import { INITIAL_PRAYERS } from "./prayersData";
 export const INITIAL_CONFERENCE_GROUPS: ConferenceGroup[] = [
   {
     id: "g1",
-    name: "المجموعة الأولى (G1)",
+    name: "مدرسة عاشور",
     code: "G1",
     color: "#10b981",
     bgColor: "bg-emerald-500/10",
@@ -22,68 +22,68 @@ export const INITIAL_CONFERENCE_GROUPS: ConferenceGroup[] = [
       { id: "m_g1_01", name: "ماريا ماجد", role: "makhdooma" },
       { id: "m_g1_02", name: "مريم فايز", role: "makhdooma" },
       { id: "m_g1_03", name: "جومانا ايهاب", role: "makhdooma" },
-      { id: "m_g1_04", name: "مينا هاني", role: "makhdoom" },
+      { id: "m_g1_04", name: "كيرلس سعيد", role: "makhdoom" },
       { id: "m_g1_05", name: "فيلوباتير سعيد", role: "makhdoom" },
       { id: "m_g1_06", name: "مينا ميلاد", role: "makhdoom" },
-      { id: "m_g1_07", name: "مارك عادل", role: "makhdoom" },
-      { id: "m_g1_08", name: "ماريو اميل", role: "makhdoom" },
-      { id: "m_g1_09", name: "فادي مفيد", role: "makhdoom" }
+      { id: "m_g1_07", name: "فادي مفيد", role: "makhdoom" },
+      { id: "m_g1_08", name: "مارك عادل", role: "makhdoom" },
+      { id: "m_g1_09", name: "ماريو اميل", role: "makhdoom" }
     ]
   },
   {
     id: "g2",
-    name: "المجموعة الثانية (G2)",
+    name: "ايس كريم",
     code: "G2",
     color: "#8b5cf6",
     bgColor: "bg-violet-500/10",
     borderColor: "border-violet-500/30",
     members: [
-      { id: "m_g2_01", name: "كاترين حسني", role: "makhdooma" },
-      { id: "m_g2_02", name: "جيسيكا نعيم", role: "makhdooma" },
-      { id: "m_g2_03", name: "جوليا جميل", role: "makhdooma" },
-      { id: "m_g2_04", name: "كيريا سامح", role: "makhdooma" },
-      { id: "m_g2_05", name: "مريم فايز", role: "makhdooma" },
-      { id: "m_g2_06", name: "مينا مرقس", role: "makhdoom" },
-      { id: "m_g2_07", name: "فادي عصام", role: "makhdoom" },
-      { id: "m_g2_08", name: "مجدي عادل", role: "makhdoom" },
-      { id: "m_g2_09", name: "كيرلس سعيد", role: "makhdoom" }
+      { id: "m_g2_01", name: "ايريني اسامه", role: "makhdooma" },
+      { id: "m_g2_02", name: "ساندرا بهاء", role: "makhdooma" },
+      { id: "m_g2_03", name: "كارين مجدي", role: "makhdooma" },
+      { id: "m_g2_04", name: "مونيكا وديع", role: "makhdooma" },
+      { id: "m_g2_05", name: "مارينا وديع", role: "makhdooma" },
+      { id: "m_g2_06", name: "كيرلس هاني", role: "makhdoom" },
+      { id: "m_g2_07", name: "مينا هاني", role: "makhdoom" },
+      { id: "m_g2_08", name: "يوسف نحميا", role: "makhdoom" },
+      { id: "m_g2_09", name: "رافي سعيد", role: "makhdoom" }
     ]
   },
   {
     id: "g3",
-    name: "المجموعة الثالثة (G3)",
+    name: "ايس كوفي",
     code: "G3",
     color: "#f59e0b",
     bgColor: "bg-amber-500/10",
     borderColor: "border-amber-500/30",
     members: [
-      { id: "m_g3_01", name: "فيرينا فتح الله", role: "makhdooma" },
-      { id: "m_g3_02", name: "ندي ريمون", role: "makhdooma" },
-      { id: "m_g3_03", name: "جاسمين عوض", role: "makhdooma" },
-      { id: "m_g3_04", name: "مريم عماد", role: "makhdooma" },
-      { id: "m_g3_05", name: "سوسنة عماد", role: "makhdooma" },
-      { id: "m_g3_06", name: "كيرلس جرجس", role: "makhdoom" },
-      { id: "m_g3_07", name: "بافلي عزمي", role: "makhdoom" },
-      { id: "m_g3_08", name: "اندرو ماجد", role: "makhdoom" }
+      { id: "m_g3_01", name: "كاتي حسني", role: "makhdooma" },
+      { id: "m_g3_02", name: "جيسيكا نعيم", role: "makhdooma" },
+      { id: "m_g3_03", name: "جوليا جميل", role: "makhdooma" },
+      { id: "m_g3_04", name: "كيريا سامح", role: "makhdooma" },
+      { id: "m_g3_05", name: "ايريني فريد", role: "makhdooma" },
+      { id: "m_g3_06", name: "مريم فايز", role: "makhdooma" },
+      { id: "m_g3_07", name: "مينا مرقص", role: "makhdoom" },
+      { id: "m_g3_08", name: "فادي عصام", role: "makhdoom" },
+      { id: "m_g3_09", name: "مجدي عادل", role: "makhdoom" }
     ]
   },
   {
     id: "g4",
-    name: "المجموعة الرابعة (G4)",
+    name: "بطاطس محمرة",
     code: "G4",
     color: "#f43f5e",
     bgColor: "bg-rose-500/10",
     borderColor: "border-rose-500/30",
     members: [
-      { id: "m_g4_01", name: "ايريني اسامه", role: "makhdooma" },
-      { id: "m_g4_02", name: "ساندرا بهاء", role: "makhdooma" },
-      { id: "m_g4_03", name: "كارين مجدي", role: "makhdooma" },
-      { id: "m_g4_04", name: "ايريني فريد", role: "makhdooma" },
-      { id: "m_g4_05", name: "كيرلس هاني", role: "makhdoom" },
-      { id: "m_g4_06", name: "رافي سعيد", role: "makhdoom" },
-      { id: "m_g4_07", name: "مارينا وديع", role: "makhdooma" },
-      { id: "m_g4_08", name: "مونيكا وديع", role: "makhdooma" },
-      { id: "m_g4_09", name: "يوسف نحميا", role: "makhdoom" }
+      { id: "m_g4_01", name: "فيرينا فتح الله", role: "makhdooma" },
+      { id: "m_g4_02", name: "ندي ريمون", role: "makhdooma" },
+      { id: "m_g4_03", name: "جاسمين عوض", role: "makhdooma" },
+      { id: "m_g4_04", name: "مريم عماد", role: "makhdooma" },
+      { id: "m_g4_05", name: "سوسنا عماد", role: "makhdooma" },
+      { id: "m_g4_06", name: "كيرلس جرجس", role: "makhdoom" },
+      { id: "m_g4_07", name: "بافلي عزمي", role: "makhdoom" },
+      { id: "m_g4_08", name: "اندرو ماجد", role: "makhdoom" }
     ]
   }
 ];
@@ -91,16 +91,16 @@ export const INITIAL_CONFERENCE_GROUPS: ConferenceGroup[] = [
 export const DEFAULT_TEAMS: Team[] = [
   { 
     id: "team1", 
-    name: "بصمة أمل", 
-    color: "#f43f5e", 
-    bgColor: "bg-rose-50 dark:bg-rose-950/20", 
-    borderColor: "border-rose-200 dark:border-rose-900", 
-    logo: "🔴",
+    name: "مدرسة عاشور", 
+    color: "#10b981", 
+    bgColor: "bg-emerald-50 dark:bg-emerald-950/20", 
+    borderColor: "border-emerald-200 dark:border-emerald-900", 
+    logo: "🟢",
     totalScore: 0
   },
   { 
     id: "team2", 
-    name: "بصمة حب", 
+    name: "ايس كريم", 
     color: "#8b5cf6", 
     bgColor: "bg-violet-50 dark:bg-violet-950/20", 
     borderColor: "border-violet-200 dark:border-violet-900", 
@@ -109,7 +109,7 @@ export const DEFAULT_TEAMS: Team[] = [
   },
   { 
     id: "team3", 
-    name: "بصمة نور", 
+    name: "ايس كوفي", 
     color: "#f59e0b", 
     bgColor: "bg-amber-50 dark:bg-amber-950/20", 
     borderColor: "border-amber-200 dark:border-amber-900", 
@@ -118,11 +118,11 @@ export const DEFAULT_TEAMS: Team[] = [
   },
   { 
     id: "team4", 
-    name: "بصمة حياة", 
-    color: "#10b981", 
-    bgColor: "bg-emerald-50 dark:bg-emerald-950/20", 
-    borderColor: "border-emerald-200 dark:border-emerald-900", 
-    logo: "🟢",
+    name: "بطاطس محمرة", 
+    color: "#f43f5e", 
+    bgColor: "bg-rose-50 dark:bg-rose-950/20", 
+    borderColor: "border-rose-200 dark:border-rose-900", 
+    logo: "🔴",
     totalScore: 0
   }
 ];
@@ -858,8 +858,8 @@ export async function restoreLostPointsFromLog27Aug() {
   const restoreByOrder: { name: string; points: number }[] = [
     { name: "مدرسة عاشور", points: 15 },
     { name: "ايس كريم", points: 10 },
-    { name: "بطاطس محمرة", points: 20 },
-    { name: "ازاي تخنق جارك", points: 20 }
+    { name: "ايس كوفي", points: 20 },
+    { name: "بطاطس محمرة", points: 20 }
   ];
 
   try {
