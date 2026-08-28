@@ -36,11 +36,20 @@ if (currentVersion !== APP_VERSION) {
   window.location.reload();
 }
 
-// Register PWA service worker safely
+// Register PWA service worker safely, with proactive automatic update checks.
+// This is the actual mechanism that clears out old cached versions for
+// everyone automatically — nobody using the site ever needs to know a
+// "clear cache" step exists. As soon as a new version is deployed, this
+// picks it up (usually within about a minute) and reloads on its own.
 try {
   import('virtual:pwa-register').then(({ registerSW }) => {
-    registerSW({ 
+    let swRegistration: ServiceWorkerRegistration | undefined;
+
+    registerSW({
       immediate: true,
+      onRegisteredSW(_url, registration) {
+        swRegistration = registration;
+      },
       onNeedRefresh() {
         if ('serviceWorker' in navigator) {
           navigator.serviceWorker.getRegistrations().then((registrations) => {
@@ -52,6 +61,23 @@ try {
         window.location.reload();
       }
     });
+
+    // Ask the browser to re-check for a new service worker file right away...
+    const checkForUpdate = () => {
+      swRegistration?.update().catch(() => {
+        // ignore transient network errors during the check
+      });
+    };
+    checkForUpdate();
+
+    // ...whenever the tab becomes visible again (e.g. someone re-opens the
+    // app after switching away on their phone)...
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') checkForUpdate();
+    });
+
+    // ...and on a steady timer, in case a tab is just left open for a while.
+    setInterval(checkForUpdate, 60 * 1000);
   }).catch((err) => {
     console.warn("PWA registration not available", err);
   });

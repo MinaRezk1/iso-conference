@@ -29,25 +29,6 @@
         window.deferredPwaPrompt = e;
         window.dispatchEvent(new Event('pwa-prompt-ready'));
       });
-
-      // Force cache clear on major updates
-      const HTML_VERSION = "1.1.0";
-      if (localStorage.getItem("html_version") !== HTML_VERSION) {
-        localStorage.setItem("html_version", HTML_VERSION);
-        if ('serviceWorker' in navigator) {
-          navigator.serviceWorker.getRegistrations().then(function(registrations) {
-            for(let registration of registrations) {
-              registration.unregister();
-            }
-          });
-        }
-        if ('caches' in window) {
-          caches.keys().then(function(names) {
-            for (let name of names) caches.delete(name);
-          });
-        }
-        window.location.reload(true);
-      }
     </script>
   </head>
   <body>
